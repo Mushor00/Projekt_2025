@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 21, 2025 at 01:36 PM
+-- Generation Time: Mar 23, 2025 at 03:43 PM
 -- Wersja serwera: 10.4.32-MariaDB
 -- Wersja PHP: 8.2.12
 
@@ -42,8 +42,9 @@ CREATE TABLE `osoby` (
 
 CREATE TABLE `sale` (
   `ID` int(11) NOT NULL,
-  `Nazwa` char(10) NOT NULL,
+  `Numer` int(11) NOT NULL,
   `Budynek` char(2) NOT NULL,
+  `Nazwa` char(5) NOT NULL,
   `Piętro` tinyint(4) NOT NULL,
   `Pojemność` int(11) NOT NULL,
   `Dostępność` char(30) NOT NULL
@@ -103,13 +104,13 @@ ALTER TABLE `osoby`
 -- AUTO_INCREMENT for table `sale`
 --
 ALTER TABLE `sale`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `wyposażenie`
 --
 ALTER TABLE `wyposażenie`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- Constraints for dumped tables
