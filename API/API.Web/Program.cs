@@ -15,7 +15,7 @@ builder.Services.AddOutputCache();
 
 builder.AddMySqlDataSource("MyDatabase", builder =>
 {
-    builder.ConnectionString = "Server=localhost;Database=san;User=oskar;Password=1234;";
+    builder.ConnectionString = "Server=localhost;Database=san;User ID=oskar;Password=1234;Port=3306;";
 });
 
 

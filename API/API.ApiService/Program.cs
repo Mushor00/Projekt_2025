@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using API.ApiService.DB;
+using Swashbuckle.AspNetCore.Swagger;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,14 +12,10 @@ builder.AddServiceDefaults();
 // Add services to the container.
 builder.Services.AddProblemDetails();
 
+builder.Services.AddSwaggerGen();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
-
-builder.AddMySqlDataSource("MyDatabase", builder =>
-{
-    builder.ConnectionString = "Server=localhost;Database=san;User=oskar;Password=1234;";
-});
-
 
 var app = builder.Build();
 
@@ -26,7 +24,8 @@ app.UseExceptionHandler();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.MapGet("/weatherforecast", async ([FromServices] MySqlDataSource db) =>
