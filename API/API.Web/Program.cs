@@ -1,5 +1,6 @@
 using API.Web;
 using API.Web.Components;
+using MySqlConnector;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,12 +13,13 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
-builder.Services.AddHttpClient<WeatherApiClient>(client =>
-    {
-        // This URL uses "https+http://" to indicate HTTPS is preferred over HTTP.
-        // Learn more about service discovery scheme resolution at https://aka.ms/dotnet/sdschemes.
-        client.BaseAddress = new("https+http://apiservice");
-    });
+builder.AddMySqlDataSource("MyDatabase", builder =>
+{
+    builder.ConnectionString = "Server=localhost;Database=san;User=oskar;Password=1234;";
+});
+
+
+builder.Services.AddScoped<ISaleApiClient, SaleApiClient>();
 
 var app = builder.Build();
 

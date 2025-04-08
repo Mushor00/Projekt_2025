@@ -1,4 +1,16 @@
 {
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "Default": "Server=localhost;User ID=root;Password=;Database=san"
+  },
+
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {
     "http": {

@@ -8,6 +8,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\API.ServiceDefaults\API.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\API.ApiService\API.ApiService.csproj" />
+  </ItemGroup>
+
+    <ItemGroup>
+    <PackageReference Include="Aspire.MySqlConnector" Version="8.0.0" />
+    <PackageReference Include="MySqlConnector" Version="2.4.0" />
+    <PackageReference Include="MySqlConnector.DependencyInjection" Version="2.4.0" />
   </ItemGroup>
 
 </Project>
