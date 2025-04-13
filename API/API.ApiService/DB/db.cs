@@ -48,7 +48,7 @@ namespace API.ApiService.DB
             return result;
         }
 
-        public static async Task<Osoby> ChceckPerson(string login, string haslo, MySqlDataSource database)
+        public static async Task<Osoby> Login(string login, string haslo, MySqlDataSource database)
         {
             using var connection = await database.OpenConnectionAsync();
             using var command = connection.CreateCommand();
@@ -57,7 +57,7 @@ namespace API.ApiService.DB
             var hashedPassword = Hashing.HashPassword(haslo);
             //command.Parameters.AddWithValue("@haslo", haslo);
             var result = await TryLoginOsobyAsync(await command.ExecuteReaderAsync());
-            if (result.ToString() == haslo)
+            if (result.ToString() == hashedPassword)
             {
                 Console.WriteLine("Hasło jest poprawne");
             }
