@@ -39,7 +39,7 @@ namespace API.ApiService.DB
                         Budynek = reader.GetString("budynek"),
                         Nazwa = reader.GetString("nazwa"),
                         Pietro = reader.GetInt32("piętro"),
-                        Pojemosc = reader.GetInt32("pojemność"),
+                        Pojemnosc = reader.GetInt32("pojemność"),
                         Dostepnosc = reader.GetString("dostępność")
                     };
                     result.Add(sale);
