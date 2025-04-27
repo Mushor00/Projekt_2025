@@ -1,0 +1,47 @@
+﻿@page "/editSala"
+
+<PageTitle>Edycja Sal</PageTitle>
+
+<div class="d-flex flex-column justify-content-center align-items-center">
+    <h1>Edycja Sal</h1>
+
+    <form style="width: 300px;">
+        <div class="mb-3">
+            <label class="form-label">Wybierz Sale</label>
+            <select class="form-select">
+                <option selected disabled>Wybierz salę...</option>
+                <option value="1">PRZYKALD</option>
+                <option value="2">PRZYKALD</option>
+                <option value="3">PRZYKALD</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Numer</label>
+            <input type="number" class="form-control" aria-describedby="emailHelp">
+            <div class="form-text"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Budynek</label>
+            <input type="text" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nazwa</label>
+            <input type="text" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Piętro</label>
+            <input type="number" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Pojemność</label>
+            <input type="number" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Dostępność</label>
+            <input type="text" class="form-control">
+        </div>
+
+        <button type="submit" class="btn btn-primary me-2">Zapisz </button>
+        <a class="btn btn-danger" href="#" role="button">Anuluj</a>
+    </form>
+</div>

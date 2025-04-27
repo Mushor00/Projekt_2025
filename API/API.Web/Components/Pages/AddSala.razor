@@ -1,0 +1,40 @@
+﻿@page "/addSala"
+@inject NavigationManager Navigation
+
+<PageTitle>Dodanie Sal</PageTitle>
+
+<div class="d-flex flex-column justify-content-center align-items-center">
+    <h1>Dodanie Sal</h1>
+
+    <div style="width: 300px;">
+        <div class="mb-3">
+            <label class="form-label">Numer</label>
+            <input type="number" class="form-control" aria-describedby="emailHelp">
+            <div class="form-text"></div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Budynek</label>
+            <input type="text" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Nazwa</label>
+            <input type="text" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Piętro</label>
+            <input type="number" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Pojemność</label>
+            <input type="number" class="form-control">
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Dostępność</label>
+            <input type="text" class="form-control">
+        </div>
+
+        <button class="btn btn-primary me-2">Dodaj</button>
+        <a class="btn btn-danger" href="#" role="button">Anuluj</a>
+    </div>
+</div>
+

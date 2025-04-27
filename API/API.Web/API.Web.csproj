@@ -7,6 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Components\Images\**" />
+    <Content Remove="Components\Images\**" />
+    <EmbeddedResource Remove="Components\Images\**" />
+    <None Remove="Components\Images\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\API.ServiceDefaults\API.ServiceDefaults.csproj" />
     <ProjectReference Include="..\API.ApiService\API.ApiService.csproj" />
   </ItemGroup>

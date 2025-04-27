@@ -1,29 +1,52 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">API</a>
+﻿<nav class="navbar navbar-expand-lg bg-white">
+    <div class="container d-flex justify-content-between align-items-center">
+        <img src="/Images/logoSAN.jpg" alt="logoSAN" width="250" height="">
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="login">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                             class="bi bi-bag" viewBox="0 0 16 16">
+                            <path d="M8 1a2.5 2.5 0 0 1 2.5 2.5V4h-5v-.5A2.5 2.5 0 0 1 8 1m3.5 3v-.5a3.5 3.5 0 1 0-7 0V4H1v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4zM2 5h12v9a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
+                        </svg>
+                        Logowanie/Rejestracja
+                    </NavLink>
+                </li>
+            </ul>
+        </div>
     </div>
-</div>
+</nav>
 
-<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+<nav class="navbar navbar-expand-lg" style="background-color: #073980;">
 
-<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
-    <nav class="nav flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
-            </NavLink>
+    <div class="container">
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <li class="nav-item mx-3">
+                    <NavLink href="" Match="NavLinkMatch.All" class="nav-link" style="color:white; background-color:transparent; padding:0.5rem 1.2rem; border-radius:6px;">
+                        SALE
+                    </NavLink>
+                </li>
+                <li class="nav-item mx-3">
+                    <NavLink href="addSala" class="nav-link" style="color:white; background-color:transparent; padding:0.5rem 1.2rem; border-radius:6px;">
+                        <span class="bi bi-plus-square-fill"></span> DODAWANIE SAL
+                    </NavLink>
+
+                </li>
+                <li class="nav-item mx-3">
+                    <NavLink href="editSala" class="nav-link" style="color:white; background-color:transparent; padding:0.5rem 1.2rem; border-radius:6px;">
+                        EDYCJA SAL
+                    </NavLink>
+                </li>
+                <li class="nav-item mx-3">
+                    <NavLink href="dawnloadData" class="nav-link" style="color:white; background-color:transparent; padding:0.5rem 1.2rem; border-radius:6px;">
+                        POBIERZ
+                    </NavLink>
+                </li>
+            </ul>
+
         </div>
+    </div>
+</nav>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-    </nav>
-</div>
