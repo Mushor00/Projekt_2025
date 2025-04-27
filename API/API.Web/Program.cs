@@ -20,6 +20,7 @@ builder.AddMySqlDataSource("MyDatabase", builder =>
 
 
 builder.Services.AddScoped<ISaleApiClient, SaleApiClient>();
+builder.Services.AddScoped<IOsobyService, OsobyService>();
 
 var app = builder.Build();
 

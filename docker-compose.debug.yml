@@ -1,0 +1,6 @@
+services:
+  projekt2025:
+    image: projekt2025
+    build:
+      context: .
+      dockerfile: ./Dockerfile

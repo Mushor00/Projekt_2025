@@ -1,0 +1,41 @@
+﻿@page "/login-test"
+@using System.ComponentModel.DataAnnotations
+@using Microsoft.AspNetCore.Components.Forms
+
+<h3>LoginTestPage</h3>
+
+<EditForm Model="@loginModel" OnValidSubmit="HandleLogin" FormName="login">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label for="username" class="form-label">Login</label>
+        <InputText id="username" class="form-control" @bind-Value="loginModel.Username" />
+    </div>
+
+    <div class="mb-3">
+        <label for="password" class="form-label">Hasło</label>
+        <InputText id="password" type="password" class="form-control" @bind-Value="loginModel.Password" />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Zaloguj się</button>
+</EditForm>
+
+@code {
+    private LoginModel loginModel = new();
+
+    private void HandleLogin()
+    {
+
+        Console.WriteLine($"Login: {loginModel.Username}, Hasło: {loginModel.Password}");
+    }
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "Login jest wymagany")]
+        public string Username { get; set; }
+
+        [Required(ErrorMessage = "Hasło jest wymagane")]
+        public string Password { get; set; }
+    }
+}

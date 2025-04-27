@@ -1,0 +1,57 @@
+﻿@page "/weather"
+@attribute [StreamRendering(true)]
+@attribute [OutputCache(Duration = 5)]
+@using API.ApiService.DB;
+
+@inject ISaleApiClient SaleApiClient
+
+<PageTitle>Weather</PageTitle>
+
+<h1>Weather</h1>
+
+<p>This component demonstrates showing data loaded from a backend API service.</p>
+
+@if (sale is not null)
+{
+    <p>@sale.Numer</p>
+    <p>@sale.Budynek</p>
+    <p>@sale.Nazwa</p>
+    <p>@sale.Pietro</p>
+    <p>@sale.Pojemnosc</p>
+    <p>@sale.ProjektorHDMI</p>
+    <p>@sale.ProjektorVGA</p>
+    <p>@sale.TablicaMultimedialna</p>
+    <p>@sale.TablicaSuchoscieralna</p>
+    <p>@sale.Klimatyzacja</p>
+    <p>@sale.Komputerowa</p>
+    <p>@sale.Dostepnosc</p>
+}
+else
+{
+    <p>Ładowanie danych...</p>
+}
+
+
+
+
+@code {
+    @code {
+    private Sale? sale;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            sale = await SaleApiClient.IGetSaleAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd w komponencie: " + ex.Message);
+        }
+    }
+}
+
+
+
+
+}
