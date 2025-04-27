@@ -1,6 +1,7 @@
 using MySqlConnector;
 using API.ApiService.hashing;
 using Microsoft.VisualBasic;
+using System.Security.Principal;
 
 
 namespace API.ApiService.DB
@@ -40,7 +41,13 @@ namespace API.ApiService.DB
                         Nazwa = reader.GetString("nazwa"),
                         Pietro = reader.GetInt32("piętro"),
                         Pojemnosc = reader.GetInt32("pojemność"),
-                        Dostepnosc = reader.GetString("dostępność")
+                        Dostepnosc = reader.GetString("dostępność"),
+                        ProjektorHDMI = reader.GetInt32("ProjektorHDMI"),
+                        ProjektorVGA = reader.GetInt32("ProjektorVGA"),
+                        TablicaMultimedialna = reader.GetInt32("TablicaMultimedialna"),
+                        TablicaSuchoscieralna = reader.GetInt32("TablicaSuchoscieralna"),
+                        Klimatyzacja = reader.GetInt32("Klimatyzacja"),
+                        Komputerowa = reader.GetInt32("Komputerowa")
                     };
                     result.Add(sale);
                 }
@@ -48,7 +55,7 @@ namespace API.ApiService.DB
             return result;
         }
 
-        public static async Task<Osoby> Login(string login, string haslo, MySqlDataSource database)
+        public async Task<Osoby> LoginAsync(string login, string haslo, MySqlDataSource database)
         {
             using var connection = await database.OpenConnectionAsync();
             using var command = connection.CreateCommand();
@@ -85,6 +92,38 @@ namespace API.ApiService.DB
                 }
             }
             return result;
+        }
+
+
+        public async Task<Osoby> RegisterAsync(string login, string haslo, string email, string imie, string nazwisko, string numerAlbumu, MySqlDataSource database)
+        {
+            using var connection = await database.OpenConnectionAsync();
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT * FROM osoby WHERE email = @email";
+            if (await command.ExecuteReaderAsync() != null)
+            {
+                Console.WriteLine("Użytkownik z tym e-mailem już istnieje.");
+                return null;
+            }
+            command.CommandText = "INSERT INTO osoby (ID, login, password, email, imie, nazwisko, NrAlbumu) VALUES (, @login, @haslo, @email, @imie, @nazwisko, @numerAlbumu)";
+            command.Parameters.AddWithValue("@login", login);
+            command.Parameters.AddWithValue("@haslo", haslo);
+            command.Parameters.AddWithValue("@email", email);
+            command.Parameters.AddWithValue("@imie", imie);
+            command.Parameters.AddWithValue("@nazwisko", nazwisko);
+            command.Parameters.AddWithValue("@numerAlbumu", numerAlbumu);
+            Console.WriteLine(command.CommandText);
+            await command.ExecuteNonQueryAsync();
+            connection.Close();
+            return new Osoby
+            {
+                Login = login,
+                Haslo = haslo,
+                Email = email,
+                Imie = imie,
+                Nazwisko = nazwisko,
+                NumerAlbumu = numerAlbumu
+            };
         }
     }
 }

@@ -17,6 +17,7 @@ public interface IOsobyService
 public class OsobyService : IOsobyService
 {
     private static List<Osoby> _osobyList = new List<Osoby>();
+    private readonly MySqlDataSource _dataSource;
 
     public async Task<(bool Success, string Message)> RegisterAsync(RegisterTestPage.RegisterModel model)
     {
@@ -25,22 +26,16 @@ public class OsobyService : IOsobyService
             return (false, "Użytkownik z tym e-mailem już istnieje.");
 
         var hashedPassword = Hashing.HashPassword(model.Password);
-        
-        var osoba = new Osoby
-        {
-            Imie = model.FirstName,
-            Nazwisko = model.LastName,
-            NumerAlbumu = model.IndexNumber,
-            Email = model.Email,
-            Haslo = hashedPassword
-        };
-        
-        _osobyList.Add(osoba);
-        
+
+        var repo = new SaleRepo(_dataSource);
+        await repo.RegisterAsync(model.Username, hashedPassword, model.Email, model.FirstName, model.LastName, model.IndexNumber, _dataSource);
+
         await Task.CompletedTask;
 
         return (true, "Rejestracja zakończona sukcesem.");
     }
+
+
 }
 
 

@@ -8,6 +8,12 @@ namespace API.ApiService.DB
         public int Pietro { get; set; }
         public int Pojemnosc { get; set; }
         public string? Dostepnosc { get; set; }
+        public int ProjektorHDMI { get; set; }
+        public int ProjektorVGA { get; set; }
+        public int TablicaMultimedialna { get; set; }
+        public int TablicaSuchoscieralna { get; set; }
+        public int Klimatyzacja { get; set; }
+        public int Komputerowa { get; set; }
     }
     public class Osoby
     {
