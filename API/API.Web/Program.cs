@@ -13,9 +13,12 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddOutputCache();
 
+builder.Services.AddServerSideBlazor()
+    .AddCircuitOptions(options => { options.DetailedErrors = true; });
+
 builder.AddMySqlDataSource("MyDatabase", builder =>
 {
-    builder.ConnectionString = "Server=localhost;Database=san;User ID=oskar;Password=1234;Port=3306;";
+    builder.ConnectionString = "Server=localhost;Database=san;User ID=root;Password=;Port=3306;";
 });
 
 

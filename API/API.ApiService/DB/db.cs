@@ -98,23 +98,37 @@ namespace API.ApiService.DB
         public async Task<Osoby> RegisterAsync(string login, string haslo, string email, string imie, string nazwisko, string numerAlbumu, MySqlDataSource database)
         {
             using var connection = await database.OpenConnectionAsync();
-            using var command = connection.CreateCommand();
-            command.CommandText = "SELECT * FROM osoby WHERE email = @email";
-            if (await command.ExecuteReaderAsync() != null)
+
+            // Sprawdzenie, czy email już istnieje
+            using (var checkCommand = connection.CreateCommand())
             {
-                Console.WriteLine("Użytkownik z tym e-mailem już istnieje.");
-                return null;
+                checkCommand.CommandText = "SELECT 1 FROM osoby WHERE email = @email";
+                checkCommand.Parameters.AddWithValue("@email", email);
+
+                using var reader = await checkCommand.ExecuteReaderAsync();
+                if (reader.HasRows)
+                {
+                    Console.WriteLine("Użytkownik z tym e-mailem już istnieje.");
+                    return null;
+                }
             }
-            command.CommandText = "INSERT INTO osoby (ID, login, password, email, imie, nazwisko, NrAlbumu) VALUES (, @login, @haslo, @email, @imie, @nazwisko, @numerAlbumu)";
-            command.Parameters.AddWithValue("@login", login);
-            command.Parameters.AddWithValue("@haslo", haslo);
-            command.Parameters.AddWithValue("@email", email);
-            command.Parameters.AddWithValue("@imie", imie);
-            command.Parameters.AddWithValue("@nazwisko", nazwisko);
-            command.Parameters.AddWithValue("@numerAlbumu", numerAlbumu);
-            Console.WriteLine(command.CommandText);
-            await command.ExecuteNonQueryAsync();
-            connection.Close();
+            
+            using (var insertCommand = connection.CreateCommand ())
+            {
+                insertCommand.CommandText = @"
+            INSERT INTO osoby (login, password, email, imie, nazwisko, numerAlbumu)
+            VALUES (@login, @haslo, @email, @imie, @nazwisko, @numerAlbumu)";
+
+                insertCommand.Parameters.AddWithValue("@login", login);
+                insertCommand.Parameters.AddWithValue("@haslo", haslo);
+                insertCommand.Parameters.AddWithValue("@email", email);
+                insertCommand.Parameters.AddWithValue("@imie", imie);
+                insertCommand.Parameters.AddWithValue("@nazwisko", nazwisko);
+                insertCommand.Parameters.AddWithValue("@numerAlbumu", numerAlbumu);
+
+                await insertCommand.ExecuteNonQueryAsync();
+            }
+
             return new Osoby
             {
                 Login = login,
@@ -125,5 +139,6 @@ namespace API.ApiService.DB
                 NumerAlbumu = numerAlbumu
             };
         }
+
     }
 }

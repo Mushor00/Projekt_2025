@@ -11,7 +11,7 @@ namespace API.Web;
 
 public interface IOsobyService
 {
-    Task<(bool Success, string Message)> RegisterAsync(RegisterTestPage.RegisterModel model);
+    Task<(bool Success, string Message)> RegisterAsync(Register.RegisterModel model);
 }
 
 public class OsobyService : IOsobyService
@@ -19,7 +19,7 @@ public class OsobyService : IOsobyService
     private static List<Osoby> _osobyList = new List<Osoby>();
     private readonly MySqlDataSource _dataSource;
 
-    public async Task<(bool Success, string Message)> RegisterAsync(RegisterTestPage.RegisterModel model)
+    public async Task<(bool Success, string Message)> RegisterAsync(Register.RegisterModel model)
     {
         var exists = _osobyList.Any(o => o.Email == model.Email);
         if (exists)
@@ -28,8 +28,13 @@ public class OsobyService : IOsobyService
         var hashedPassword = Hashing.HashPassword(model.Password);
 
         var repo = new SaleRepo(_dataSource);
-        await repo.RegisterAsync(model.Username, hashedPassword, model.Email, model.FirstName, model.LastName, model.IndexNumber, _dataSource);
+        var result =  await repo.RegisterAsync(model.Username, hashedPassword, model.Email, model.FirstName, model.LastName, model.IndexNumber, _dataSource);
 
+        if (result == null)
+        {
+            return (false, "Wystąpił błąd podczas rejestracji użytkownika.");
+        }
+        
         await Task.CompletedTask;
 
         return (true, "Rejestracja zakończona sukcesem.");
