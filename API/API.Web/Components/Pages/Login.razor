@@ -1,22 +1,79 @@
 ﻿@page "/login"
+@rendermode InteractiveServer
+@using System.ComponentModel.DataAnnotations
+@inject IOsobyService OsobyService
+@inject NavigationManager Navigation
 
 <PageTitle>Logowanie</PageTitle>
 
 <div class="d-flex flex-column justify-content-center align-items-center">
     <h1>Logowanie</h1>
 
-    <form style="width: 300px;">
-        <div class="mb-3">
-            <label class="form-label">Login</label>
-            <input type="email" class="form-control" aria-describedby="emailHelp">
-            <div class="form-text"></div>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Hasło</label>
-            <input type="password" class="form-control">
-        </div>
+    <EditForm Model="loginModel" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-        <button type="submit" class="btn btn-primary me-2">Zaloguj</button>
-        <a class="btn btn-danger" href='/register' role="button">Zarejestruj się</a>
-    </form>
+        <div style="width: 300px;">
+            <div class="mb-3">
+                <label class="form-label">Adres e-mail</label>
+                <InputText @bind-Value="loginModel.Username" class="form-control" />
+                <ValidationMessage For="@(() => loginModel.Username)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Hasło</label>
+                <InputText @bind-Value="loginModel.Password" class="form-control" type="password" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary me-2">Zaloguj</button>
+            <a class="btn btn-danger" href='/register' role="button">Zarejestruj się</a>
+        </div>
+    </EditForm>
 </div>
+
+@code {
+    private LoginModel loginModel = new();
+    private string ErrorMessage;
+    private bool IsLoggingIn = false;
+
+    private async Task HandleLogin()
+    {
+        IsLoggingIn = true;
+        ErrorMessage = string.Empty;
+
+        try
+        {
+            var result = await OsobyService.LoginAsync(loginModel.Username, loginModel.Password);
+
+            if (result)
+            {
+                // Sukces – przekierowanie np. do strony głównej
+                Navigation.NavigateTo("/");
+            }
+            else
+            {
+                // Błędne dane logowania
+                ErrorMessage = "Nieprawidłowy login lub hasło.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = $"Wystąpił błąd: {ex.Message}";
+        }
+        finally
+        {
+            IsLoggingIn = false;
+        }
+    }
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "Login jest wymagany")]
+        [EmailAddress(ErrorMessage = "Nieprawidłowy adres e-mail")]
+        public string Username { get; set; }
+
+        [Required(ErrorMessage = "Hasło jest wymagane")]
+        public string Password { get; set; }
+    }
+}
