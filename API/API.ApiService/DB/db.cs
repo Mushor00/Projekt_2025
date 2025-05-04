@@ -71,6 +71,7 @@ namespace API.ApiService.DB
             else
             {
                 Console.WriteLine("Hasło jest niepoprawne");
+
             }
             connection.Close();
             return result;

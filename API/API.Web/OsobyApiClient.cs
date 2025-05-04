@@ -43,17 +43,33 @@ public class OsobyService : IOsobyService
         return (true, "Rejestracja zakończona sukcesem.");
     }
 
-    public async Task<(bool Success, string Message)> LoginAsync(string email, string password)
+    public async Task<(bool Success, string Message)> LoginAsync(string login, string haslo)
     {
-        var repo = new SaleRepo(_dataSource);
-        var user = await repo.LoginAsync(email, password, _dataSource);
+        using var connection = await _dataSource.OpenConnectionAsync(); 
+        using var command = connection.CreateCommand();
 
-        if (user == null)
-            return (false, "Nieprawidłowy login lub hasło.");
+        command.CommandText = "SELECT * FROM osoby WHERE login = @login";
+        command.Parameters.AddWithValue("@login", login);
 
-        return (true, "Zalogowano pomyślnie.");
-        
+        using var reader = await command.ExecuteReaderAsync();
+
+        if (await reader.ReadAsync())
+        {
+            var storedHashedPassword = reader.GetString(reader.GetOrdinal("password"));
+            var inputHashedPassword = Hashing.HashPassword(haslo);
+
+            if (storedHashedPassword == inputHashedPassword)
+            {
+                Console.WriteLine("Hasło jest poprawne");
+                return (true, "Zalogowano pomyślnie");
+            }
+        }
+
+        Console.WriteLine("Hasło jest niepoprawne");
+        return (false, "Nieprawidłowy login lub hasło");
     }
+
+
 }
 
 

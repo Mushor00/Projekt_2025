@@ -1,4 +1,9 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Components
+@using Microsoft.AspNetCore.Components.Routing
+@inject NavigationManager Navigation
+@inject UserSessionService Session
+
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -13,8 +18,20 @@
 </head>
 
 <body>
-    <Routes />
-    <script src="_framework/blazor.web.js"></script>
+<Routes />
+<script src="_framework/blazor.web.js"></script>
 </body>
 
 </html>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        // Sprawdź, czy użytkownik jest zalogowany
+        if (!Session.IsLoggedIn && !Navigation.Uri.Contains("login") && !Navigation.Uri.Contains("register"))
+        {
+            Navigation.NavigateTo("/login", forceLoad: true); 
+            
+        }
+    }
+}

@@ -7,12 +7,12 @@ var builder = WebApplication.CreateBuilder(args);
 // Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
+
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
 
 builder.Services.AddOutputCache();
-
 builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
@@ -24,7 +24,7 @@ builder.AddMySqlDataSource("MyDatabase", builder =>
 
 builder.Services.AddScoped<ISaleApiClient, SaleApiClient>();
 builder.Services.AddScoped<IOsobyService, OsobyService>();
-
+builder.Services.AddSingleton<UserSessionService>();
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

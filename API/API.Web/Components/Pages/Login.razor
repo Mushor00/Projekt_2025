@@ -3,6 +3,8 @@
 @using System.ComponentModel.DataAnnotations
 @inject IOsobyService OsobyService
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
+@inject UserSessionService Session
 
 <PageTitle>Logowanie</PageTitle>
 
@@ -44,26 +46,40 @@
 
         try
         {
-            var result = await OsobyService.LoginAsync(loginModel.Username, loginModel.Password);
+            var (success, message) = await OsobyService.LoginAsync(loginModel.Username, loginModel.Password);
 
-            if (result)
+            if (success)
             {
-                // Sukces – przekierowanie np. do strony głównej
-                Navigation.NavigateTo("/");
+
+                await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "username", loginModel.Username);
+                await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "email", loginModel.Username); 
+                Session.SetUser(loginModel.Username);
+                await Task.Delay(100);
+                Navigation.NavigateTo("/", forceLoad: true);
             }
             else
             {
-                // Błędne dane logowania
-                ErrorMessage = "Nieprawidłowy login lub hasło.";
+
+                ErrorMessage = message; 
             }
         }
         catch (Exception ex)
         {
+
             ErrorMessage = $"Wystąpił błąd: {ex.Message}";
         }
         finally
         {
             IsLoggingIn = false;
+        }
+        
+        
+    }
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();
         }
     }
 
@@ -76,4 +92,5 @@
         [Required(ErrorMessage = "Hasło jest wymagane")]
         public string Password { get; set; }
     }
+    
 }
