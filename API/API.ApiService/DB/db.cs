@@ -2,6 +2,7 @@ using MySqlConnector;
 using API.ApiService.hashing;
 using Microsoft.VisualBasic;
 using System.Security.Principal;
+using System.Security.Cryptography.X509Certificates;
 
 
 namespace API.ApiService.DB
@@ -55,7 +56,7 @@ namespace API.ApiService.DB
             return result;
         }
 
-        public async Task<Osoby> LoginAsync(string login, string haslo, MySqlDataSource database)
+        public async Task<(bool Success, string Message)> LoginAsync(string login, string haslo, MySqlDataSource database)
         {
             using var connection = await database.OpenConnectionAsync();
             using var command = connection.CreateCommand();
@@ -67,15 +68,13 @@ namespace API.ApiService.DB
             if (result.ToString() == hashedPassword)
             {
                 Console.WriteLine("Hasło jest poprawne");
+                return (true, "Zalogowano pomyślnie");
             }
             else
             {
                 Console.WriteLine("Hasło jest niepoprawne");
-
+                return (false, "Nieprawidłowy login lub hasło");
             }
-            connection.Close();
-            return result;
-
         }
         private static async Task<Osoby> TryLoginOsobyAsync(MySqlDataReader reader)
         {
@@ -113,12 +112,10 @@ namespace API.ApiService.DB
                     return null;
                 }
             }
-            
-            using (var insertCommand = connection.CreateCommand ())
+
+            using (var insertCommand = connection.CreateCommand())
             {
-                insertCommand.CommandText = @"
-            INSERT INTO osoby (login, password, email, imie, nazwisko, numerAlbumu)
-            VALUES (@login, @haslo, @email, @imie, @nazwisko, @numerAlbumu)";
+                insertCommand.CommandText = @"INSERT INTO osoby (login, password, email, imie, nazwisko, nralbumu) VALUES (@login, @haslo, @email, @imie, @nazwisko, @numerAlbumu)";
 
                 insertCommand.Parameters.AddWithValue("@login", login);
                 insertCommand.Parameters.AddWithValue("@haslo", haslo);

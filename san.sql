@@ -18,9 +18,11 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `san`
+CREATE DATABASE IF NOT EXISTS `san` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 --
-
+CREATE USER `oskar`@`localhost`;
+--
+GRANT ALL PRIVILEGES ON `san`.* TO 'oskar'@'localhost' IDENTIFIED BY '1234';
 -- --------------------------------------------------------
 
 --
