@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 23, 2025 at 03:43 PM
+-- Generation Time: Maj 06, 2025 at 09:32 PM
 -- Wersja serwera: 10.4.32-MariaDB
 -- Wersja PHP: 8.2.12
 
@@ -31,7 +31,10 @@ CREATE TABLE `osoby` (
   `ID` int(11) NOT NULL,
   `Login` char(255) NOT NULL,
   `Password` char(255) NOT NULL,
-  `Email` char(255) NOT NULL
+  `Email` char(255) NOT NULL,
+  `Imie` char(50) NOT NULL,
+  `Nazwisko` char(50) NOT NULL,
+  `NrAlbumu` int(10) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
 -- --------------------------------------------------------
@@ -47,25 +50,21 @@ CREATE TABLE `sale` (
   `Nazwa` char(5) NOT NULL,
   `Piętro` tinyint(4) NOT NULL,
   `Pojemność` int(11) NOT NULL,
-  `Dostępność` char(30) NOT NULL
+  `Dostępność` char(30) NOT NULL,
+  `ProjektorHDMI` int(1) NOT NULL,
+  `ProjektorVGA` int(1) NOT NULL,
+  `TablicaMultimedialna` int(1) NOT NULL,
+  `TablicaSuchoscieralna` int(1) NOT NULL,
+  `Klimatyzacja` int(1) NOT NULL,
+  `Komputerowa` int(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
--- --------------------------------------------------------
-
 --
--- Struktura tabeli dla tabeli `wyposażenie`
+-- Dumping data for table `sale`
 --
 
-CREATE TABLE `wyposażenie` (
-  `ID` int(11) NOT NULL,
-  `ID_sale` int(11) NOT NULL,
-  `Projektor_HDMI` tinyint(1) NOT NULL,
-  `Projektor_VGA` tinyint(1) NOT NULL,
-  `Tablica_multimedialna` tinyint(1) NOT NULL,
-  `Tablica_suchościeralna` tinyint(1) NOT NULL,
-  `Klimatyzacja` tinyint(1) NOT NULL,
-  `Komputerowa` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
+INSERT INTO `sale` (`ID`, `Numer`, `Budynek`, `Nazwa`, `Piętro`, `Pojemność`, `Dostępność`, `ProjektorHDMI`, `ProjektorVGA`, `TablicaMultimedialna`, `TablicaSuchoscieralna`, `Klimatyzacja`, `Komputerowa`) VALUES
+(2, 0, '[v', '[valu', 0, 0, '[value-7]', 0, 0, 0, 0, 0, 0);
 
 --
 -- Indeksy dla zrzutów tabel
@@ -84,13 +83,6 @@ ALTER TABLE `sale`
   ADD PRIMARY KEY (`ID`);
 
 --
--- Indeksy dla tabeli `wyposażenie`
---
-ALTER TABLE `wyposażenie`
-  ADD PRIMARY KEY (`ID`),
-  ADD KEY `Połączenie_sale_wyposazenie` (`ID_sale`);
-
---
 -- AUTO_INCREMENT for dumped tables
 --
 
@@ -104,23 +96,7 @@ ALTER TABLE `osoby`
 -- AUTO_INCREMENT for table `sale`
 --
 ALTER TABLE `sale`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
-
---
--- AUTO_INCREMENT for table `wyposażenie`
---
-ALTER TABLE `wyposażenie`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
-
---
--- Constraints for dumped tables
---
-
---
--- Constraints for table `wyposażenie`
---
-ALTER TABLE `wyposażenie`
-  ADD CONSTRAINT `Połączenie_sale_wyposazenie` FOREIGN KEY (`ID_sale`) REFERENCES `sale` (`ID`);
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
