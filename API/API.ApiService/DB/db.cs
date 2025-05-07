@@ -1,8 +1,12 @@
+using System.Data.Common;
 using MySqlConnector;
 using API.ApiService.hashing;
 using Microsoft.VisualBasic;
 using System.Security.Principal;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using API.ApiService.Filters;
+using Microsoft.AspNetCore.Mvc;
 
 
 namespace API.ApiService.DB
@@ -28,6 +32,104 @@ namespace API.ApiService.DB
                 return null;
             }
 
+        }
+        
+        public async Task<List<Sale>> GetFilteredSales([FromBody] SaleFilter filter)
+        {
+            using var connection = await database.OpenConnectionAsync();
+            using var command = connection.CreateCommand();
+            var query = new StringBuilder("SELECT * FROM sale WHERE 1=1");
+
+            if (!string.IsNullOrWhiteSpace(filter.Numer))
+            {
+                query.Append(" AND Numer LIKE @Numer");
+                command.Parameters.AddWithValue("@Numer", $"%{filter.Numer}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Budynek))
+            {
+                query.Append(" AND Budynek LIKE @Budynek");
+                command.Parameters.AddWithValue("@Budynek", $"%{filter.Budynek}%");
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Nazwa))
+            {
+                query.Append(" AND Nazwa LIKE @Nazwa");
+                command.Parameters.AddWithValue("@Nazwa", $"%{filter.Nazwa}%");
+            }
+
+            if (filter.Pietro.HasValue)
+            {
+                query.Append(" AND Piętro = @Pietro");
+                command.Parameters.AddWithValue("@Pietro", filter.Pietro.Value);
+            }
+
+            if (filter.Pojemnosc.HasValue)
+            {
+                query.Append(" AND Pojemność = @Pojemnosc");
+                command.Parameters.AddWithValue("@Pojemnosc", filter.Pojemnosc.Value);
+            }
+
+            if (filter.Projektor == "HDMI")
+            {
+                query.Append(" AND ProjektorHDMI = 1");
+            }
+            else if (filter.Projektor == "VGA")
+            {
+                query.Append(" AND ProjektorVGA = 1");
+            }
+
+            if (filter.Tablica == "Multimedialna")
+            {
+                query.Append(" AND TablicaMultimedialna = 1");
+            }
+            else if (filter.Tablica == "Suchoscierna")
+            {
+                query.Append(" AND TablicaSuchoscieralna = 1");
+            }
+
+            if (filter.Klimatyzacja.HasValue)
+            {
+                query.Append(" AND Klimatyzacja = @Klimatyzacja");
+                command.Parameters.AddWithValue("@Klimatyzacja", filter.Klimatyzacja.Value ? 1 : 0);
+            }
+
+            if (filter.Komputerowa.HasValue)
+            {
+                query.Append(" AND Komputerowa = @Komputerowa");
+                command.Parameters.AddWithValue("@Komputerowa", filter.Komputerowa.Value ? 1 : 0);
+            }
+
+            if (!string.IsNullOrWhiteSpace(filter.Dostepnosc))
+            {
+                query.Append(" AND Status = @Status");
+                command.Parameters.AddWithValue("@Status", filter.Dostepnosc);
+            }
+
+            command.CommandText = query.ToString();
+
+            var sales = new List<Sale>();
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                sales.Add(new Sale
+                {
+                    Numer = reader.GetInt32(reader.GetOrdinal("Numer")),
+                    Budynek = reader.GetString(reader.GetOrdinal("Budynek")),
+                    Nazwa = reader.GetString(reader.GetOrdinal("Nazwa")),
+                    Pietro = reader.GetInt32(reader.GetOrdinal("Piętro")),
+                    Pojemnosc = reader.GetInt32(reader.GetOrdinal("Pojemność")),
+                    ProjektorVGA = reader.GetInt32(reader.GetOrdinal("ProjektorVGA")),
+                    ProjektorHDMI = reader.GetInt32(reader.GetOrdinal("ProjektorHDMI")),
+                    TablicaMultimedialna = reader.GetInt32(reader.GetOrdinal("TablicaMultimedialna")),
+                    TablicaSuchoscieralna = reader.GetInt32(reader.GetOrdinal("TablicaSuchoscieralna")),
+                    Klimatyzacja = reader.GetInt32(reader.GetOrdinal("Klimatyzacja")),
+                    Komputerowa = reader.GetInt32(reader.GetOrdinal("Komputerowa")),
+                });
+            }
+
+            return sales;
         }
 
         private static async Task<List<Sale>> ReadAllSaleAsync(MySqlDataReader reader)

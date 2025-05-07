@@ -1,6 +1,8 @@
 ﻿@page "/"
 @using API.ApiService.DB
+@using API.ApiService.Filters
 @inject ISaleApiClient SaleApiClient
+@rendermode InteractiveServer
 
 <PageTitle>Sale</PageTitle>
 <div class="d-flex flex-column justify-content-center align-items-center">
@@ -11,60 +13,59 @@
     <h4>Filtry</h4>
     <div class="row g-2">
         <div class="col-md-3">
-            <input class="form-control" placeholder="Filtruj po numerze sali" />
+            <input class="form-control" @bind="filter.Numer" placeholder="Filtruj po numerze sali" />
         </div>
         <div class="col-md-3">
-            <input class="form-control" placeholder="Filtruj po budynku" />
+            <input class="form-control" @bind="filter.Budynek" placeholder="Filtruj po budynku" />
         </div>
         <div class="col-md-3">
-            <input class="form-control" placeholder="Filtruj po nazwie" />
+            <input class="form-control" @bind="filter.Nazwa" placeholder="Filtruj po nazwie" />
         </div>
         <div class="col-md-3">
-            <input class="form-control" placeholder="Filtruj po piętrze" />
+            <input type="number" class="form-control" @bind="filter.Pietro" placeholder="Filtruj po piętrze" />
         </div>
         <div class="col-md-3">
-            <input class="form-control" placeholder="Filtruj po pojemności" />
+            <input type="number" class="form-control" @bind="filter.Pojemnosc" placeholder="Filtruj po pojemności" />
         </div>
         <div class="col-md-3">
-            <select class="form-select">
+            <select class="form-select" @bind="filter.Projektor">
                 <option value="">Projektor</option>
                 <option value="HDMI">HDMI</option>
                 <option value="VGA">VGA</option>
             </select>
         </div>
         <div class="col-md-3">
-            <select class="form-select">
+            <select class="form-select" @bind="filter.Tablica">
                 <option value="">Tablica</option>
                 <option value="Multimedialna">Multimedialna</option>
                 <option value="Suchoscierna">Suchościerna</option>
             </select>
         </div>
         <div class="col-md-3">
-            <select class="form-select">
+            <select class="form-select" @bind="filter.Klimatyzacja">
                 <option value="">Klimatyzacja</option>
                 <option value="1">Tak</option>
                 <option value="0">Nie</option>
             </select>
         </div>
         <div class="col-md-3">
-            <select class="form-select">
+            <select class="form-select" @bind="filter.Komputerowa">
                 <option value="">Sala komputerowa</option>
                 <option value="1">Tak</option>
                 <option value="0">Nie</option>
             </select>
         </div>
         <div class="col-md-3">
-            <select class="form-select">
+            <select class="form-select" @bind="filter.Dostepnosc">
                 <option value="">Wszystkie</option>
                 <option value="Dostępna">Dostępna</option>
                 <option value="Zajęta">Zajęta</option>
             </select>
         </div>
         <div class="col-md-3">
-            <button class="btn btn-primary">Zastosuj Filtry</button>
-            <button class="btn btn-danger">Usuń Filtry</button>
+            <button class="btn btn-primary" @onclick="ApplyFilters">Zastosuj Filtry</button>
+            <button class="btn btn-danger" @onclick="ResetFilters">Usuń Filtry</button>
         </div>
-
     </div>
 </div>
 
@@ -170,7 +171,6 @@
                 </td>
             </tr>
             lp++;
-
         }
     }
     
@@ -179,6 +179,8 @@
 
 @code {
     private List<Sale> sales;
+    
+    private SaleFilter filter = new();
 
     protected override async Task OnInitializedAsync()
     {
@@ -190,5 +192,23 @@
         {
             Console.WriteLine("Błąd w komponencie: " + ex.Message);
         }
+    }
+
+    private async Task ApplyFilters()
+    {
+        try
+        {
+            sales = await SaleApiClient.GetFilteredSales(filter);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd przy filtrowaniu: " + ex.Message);
+        }
+    }
+
+    private async Task ResetFilters()
+    {
+        filter = new SaleFilter();
+        await ApplyFilters();
     }
 }
