@@ -9,7 +9,7 @@ namespace API.ApiService.DB
 {
     public class SaleRepo(MySqlDataSource database)
     {
-        public async Task<Sale?> GetSaleAsync()
+        public async Task<List<Sale>?> GetSaleAsync()
         {
             try
             {
@@ -17,8 +17,10 @@ namespace API.ApiService.DB
                 using var command = connection.CreateCommand();
                 command.CommandText = "SELECT * FROM sale";
                 var result = await ReadAllSaleAsync(await command.ExecuteReaderAsync());
+                
+                
                 connection.Close();
-                return result.FirstOrDefault();
+                return result ?? new List<Sale>();
             }
             catch (Exception ex)
             {

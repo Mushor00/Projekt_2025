@@ -7,7 +7,7 @@ namespace API.Web;
 
 public interface ISaleApiClient
 {
-    Task<Sale?> IGetSaleAsync();
+    Task<List<Sale>?> IGetSaleAsync();
 }
 
 public class SaleApiClient : ISaleApiClient
@@ -19,7 +19,7 @@ public class SaleApiClient : ISaleApiClient
         _dataSource = dataSource;
     }
 
-    public async Task<Sale?> IGetSaleAsync()
+    public async Task<List<Sale>?> IGetSaleAsync()
     {
         try
         {

@@ -5,6 +5,7 @@
 @inject NavigationManager Navigation
 @inject IJSRuntime JSRuntime
 @inject UserSessionService Session
+@using API.Web.Components;
 
 <PageTitle>Logowanie</PageTitle>
 <nav class="navbar navbar-expand-lg" style="background-color: #073980;">
@@ -94,5 +95,4 @@
         [Required(ErrorMessage = "Hasło jest wymagane")]
         public string Password { get; set; }
     }
-    
 }

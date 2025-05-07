@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using API.ApiService.DB
+@inject ISaleApiClient SaleApiClient
 
 <PageTitle>Sale</PageTitle>
 <div class="d-flex flex-column justify-content-center align-items-center">
@@ -69,79 +71,124 @@
 <table class="table table-striped-columns caption-top">
     <caption>Lista Sal</caption>
     <thead>
-        <tr>
-            <th scope="col">#</th>
-            <th scope="col">Numer</th>
-            <th scope="col">Budynek</th>
-            <th scope="col">Nazwa</th>
-            <th scope="col">Piętro</th>
-            <th scope="col">Pojemność</th>
-            <th scope="col">Projektor</th>
-            <th scope="col">Tablica</th>
-            <th scope="col">Klimatyzacja</th>
-            <th scope="col">Sala Komputerowa</th>
-            <th scope="col">Dostepność</th>
-            <th scope="col"></th>
-        </tr>
+    <tr>
+        <th scope="col">#</th>
+        <th scope="col">Numer</th>
+        <th scope="col">Budynek</th>
+        <th scope="col">Nazwa</th>
+        <th scope="col">Piętro</th>
+        <th scope="col">Pojemność</th>
+        <th scope="col">Projektor</th>
+        <th scope="col">Tablica</th>
+        <th scope="col">Klimatyzacja</th>
+        <th scope="col">Sala Komputerowa</th>
+        <th scope="col">Dostepność</th>
+        <th scope="col"></th>
+    </tr>
 
     </thead>
     <tbody>
-        <tr>
-            <th scope="row">1</th>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>
-                <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
-                <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
-                <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
-            </td>
-        </tr>
+    @{
+        int lp = 1;
+    }
+    @if (sales is null)
+    {
+        <p>Brak Sal</p>
+    }
+    else
+    {
+        @foreach (var item in sales)
+        {
+            <tr>
+                <th scope="row">@lp</th>
+                <td>@item.Numer</td>
+                <td>@item.Budynek</td>
+                <td>@item.Nazwa</td>
+                <td>@item.Pietro</td>
+                <td>@item.Pojemnosc</td>
+                <td>
+                    @if (item.ProjektorVGA == 1 && item.ProjektorHDMI == 1)
+                    {
+                        <p>VGA/HDMI</p>
+                    }
+                    else if (item.ProjektorVGA == 1)
+                    {
+                        <p>VGA</p>
+                    }
+                    else if (item.ProjektorHDMI == 1)
+                    {
+                        <p>HDMI</p>
+                    }
+                    else
+                    {
+                        <p>Brak</p>
+                    }
+                </td>
+                <td>
+                    @if (item.TablicaMultimedialna == 1 && item.TablicaSuchoscieralna == 1)
+                    {
+                        <p>Multimedialna/Suchoscierna</p>
+                    }
+                    else if (item.TablicaMultimedialna == 1)
+                    {
+                        <p>Multimedialna</p>
+                    }
+                    else if (item.TablicaSuchoscieralna == 1)
+                    {
+                        <p>Suchościeralna</p>
+                    }
+                    else
+                    {
+                        <p>Brak</p>
+                    }
+                </td>
+                <td>
+                    @if (item.Klimatyzacja == 1)
+                    {
+                        <p>Tak</p>
+                    }
+                    else
+                    {
+                        <p>Nie</p>
+                    }
+                </td>
+                <td>
+                    @if (item.Komputerowa == 1)
+                    {
+                        <p>Tak</p>
+                    }
+                    else
+                    {
+                        <p>Nie</p>
+                    }
+                </td>
+                <td>halooo!!!! pozdrawiam!!!</td>
+                <td>
+                    <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
+                    <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
+                    <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
+                </td>
+            </tr>
+            lp++;
 
-        <tr>
-            <th scope="row">2</th>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>
-                <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
-                <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
-                <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
-            </td>
-        </tr>
-
-        <tr>
-            <th scope="row">3</th>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>PRZYKALD</td>
-            <td>
-                <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
-                <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
-                <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
-            </td>
-        </tr>
-
+        }
+    }
+    
     </tbody>
 </table>
+
+@code {
+    private List<Sale> sales;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            sales = await SaleApiClient.IGetSaleAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd w komponencie: " + ex.Message);
+        }
+    }
+}

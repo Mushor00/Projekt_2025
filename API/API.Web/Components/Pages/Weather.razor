@@ -34,15 +34,4 @@ else
 @code {
     private Sale? sale;
 
-    protected override async Task OnInitializedAsync()
-    {
-        try
-        {
-            sale = await SaleApiClient.IGetSaleAsync();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Błąd w komponencie: " + ex.Message);
-        }
-    }
 }
