@@ -1,43 +1,39 @@
 ﻿@page "/editSala"
 
-<PageTitle>Edycja Sal</PageTitle>
+<PageTitle>Edycja Rezerwacji</PageTitle>
 
 <div class="d-flex flex-column justify-content-center align-items-center">
-    <h1>Edycja Sal</h1>
+    <h1>Edytuj Rezerwacje Sali</h1>
 
     <form style="width: 300px;">
         <div class="mb-3">
-            <label class="form-label">Wybierz Sale</label>
-            <select class="form-select">
-                <option selected disabled>Wybierz salę...</option>
-                <option value="1">PRZYKALD</option>
-                <option value="2">PRZYKALD</option>
-                <option value="3">PRZYKALD</option>
-            </select>
+            <div class="mb-3">
+                <label class="form-label">Wybierz Sale</label>
+                <select class="form-select">
+                    <option selected disabled>Wybierz salę...</option>
+                    <option value="1">PRZYKALD</option>
+                    <option value="2">PRZYKALD</option>
+                    <option value="3">PRZYKALD</option>
+                </select>
+            </div>
         </div>
         <div class="mb-3">
-            <label class="form-label">Numer</label>
-            <input type="number" class="form-control" aria-describedby="emailHelp">
-            <div class="form-text"></div>
+            <label class="form-label">Data</label>
+            <input type="date" class="form-control">
         </div>
+
         <div class="mb-3">
-            <label class="form-label">Budynek</label>
-            <input type="text" class="form-control">
+            <label class="form-label">Godzina od</label>
+            <input type="time" class="form-control">
         </div>
+
         <div class="mb-3">
-            <label class="form-label">Nazwa</label>
-            <input type="text" class="form-control">
+            <label class="form-label">Godzina do</label>
+            <input type="time" class="form-control">
         </div>
+
         <div class="mb-3">
-            <label class="form-label">Piętro</label>
-            <input type="number" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Pojemność</label>
-            <input type="number" class="form-control">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Dostępność</label>
+            <label class="form-label">Rezerwujący</label>
             <input type="text" class="form-control">
         </div>
 

@@ -1,18 +1,89 @@
 ﻿@page "/"
 
 <PageTitle>Sale</PageTitle>
+<div class="d-flex flex-column justify-content-center align-items-center">
+    <h1>Sale</h1>
+</div>
 
-<h1>Sale</h1>
+<div class="container my-4">
+    <h4>Filtry</h4>
+    <div class="row g-2">
+        <div class="col-md-3">
+            <input class="form-control" placeholder="Filtruj po numerze sali" />
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" placeholder="Filtruj po budynku" />
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" placeholder="Filtruj po nazwie" />
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" placeholder="Filtruj po piętrze" />
+        </div>
+        <div class="col-md-3">
+            <input class="form-control" placeholder="Filtruj po pojemności" />
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option value="">Projektor</option>
+                <option value="HDMI">HDMI</option>
+                <option value="VGA">VGA</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option value="">Tablica</option>
+                <option value="Multimedialna">Multimedialna</option>
+                <option value="Suchoscierna">Suchościerna</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option value="">Klimatyzacja</option>
+                <option value="1">Tak</option>
+                <option value="0">Nie</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option value="">Sala komputerowa</option>
+                <option value="1">Tak</option>
+                <option value="0">Nie</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select">
+                <option value="">Wszystkie</option>
+                <option value="Dostępna">Dostępna</option>
+                <option value="Zajęta">Zajęta</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary">Zastosuj Filtry</button>
+            <button class="btn btn-danger">Usuń Filtry</button>
+        </div>
 
-<table class="table caption-top">
+    </div>
+</div>
+
+<table class="table table-striped-columns caption-top">
     <caption>Lista Sal</caption>
     <thead>
         <tr>
             <th scope="col">#</th>
-            <th scope="col">Budynek</th>
             <th scope="col">Numer</th>
-            <th scope="col">Dostępność</th>
+            <th scope="col">Budynek</th>
+            <th scope="col">Nazwa</th>
+            <th scope="col">Piętro</th>
+            <th scope="col">Pojemność</th>
+            <th scope="col">Projektor</th>
+            <th scope="col">Tablica</th>
+            <th scope="col">Klimatyzacja</th>
+            <th scope="col">Sala Komputerowa</th>
+            <th scope="col">Dostepność</th>
+            <th scope="col"></th>
         </tr>
+
     </thead>
     <tbody>
         <tr>
@@ -20,18 +91,57 @@
             <td>PRZYKALD</td>
             <td>PRZYKALD</td>
             <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>
+                <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
+                <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
+                <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
+            </td>
         </tr>
+
         <tr>
             <th scope="row">2</th>
             <td>PRZYKALD</td>
             <td>PRZYKALD</td>
             <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>
+                <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
+                <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
+                <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
+            </td>
         </tr>
+
         <tr>
             <th scope="row">3</th>
             <td>PRZYKALD</td>
             <td>PRZYKALD</td>
             <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>PRZYKALD</td>
+            <td>
+                <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
+                <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
+                <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
+            </td>
         </tr>
+
     </tbody>
 </table>
