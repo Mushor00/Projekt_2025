@@ -20,7 +20,7 @@ SET time_zone = "+00:00";
 --
 CREATE DATABASE IF NOT EXISTS `san` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 --
-CREATE USER `oskar`@`localhost`;
+CREATE USER if not EXISTS `oskar`@`localhost`;
 --
 GRANT ALL PRIVILEGES ON `san`.* TO 'oskar'@'localhost' IDENTIFIED BY '1234';
 -- --------------------------------------------------------
@@ -28,7 +28,7 @@ GRANT ALL PRIVILEGES ON `san`.* TO 'oskar'@'localhost' IDENTIFIED BY '1234';
 --
 -- Struktura tabeli dla tabeli `osoby`
 --
-
+USE `san`;
 CREATE TABLE `osoby` (
   `ID` int(11) NOT NULL,
   `Login` char(255) NOT NULL,
