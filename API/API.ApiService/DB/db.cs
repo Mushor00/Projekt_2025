@@ -21,8 +21,8 @@ namespace API.ApiService.DB
                 using var command = connection.CreateCommand();
                 command.CommandText = "SELECT * FROM sale";
                 var result = await ReadAllSaleAsync(await command.ExecuteReaderAsync());
-                
-                
+
+
                 connection.Close();
                 return result ?? new List<Sale>();
             }
@@ -33,7 +33,7 @@ namespace API.ApiService.DB
             }
 
         }
-        
+
         public async Task<List<Sale>> GetFilteredSales([FromBody] SaleFilter filter)
         {
             using var connection = await database.OpenConnectionAsync();
@@ -164,40 +164,31 @@ namespace API.ApiService.DB
         {
             using var connection = await database.OpenConnectionAsync();
             using var command = connection.CreateCommand();
-            command.CommandText = "SELECT password FROM osoby WHERE login = @login";
+            command.CommandText = "SELECT password FROM osoby WHERE email = @login";
             command.Parameters.AddWithValue("@login", login);
             var hashedPassword = Hashing.HashPassword(haslo);
-            //command.Parameters.AddWithValue("@haslo", haslo);
-            var result = await TryLoginOsobyAsync(await command.ExecuteReaderAsync());
-            if (result.ToString() == hashedPassword)
+
+            var result = await command.ExecuteReaderAsync();
+
+
+            if (await result.ReadAsync())
             {
-                Console.WriteLine("Hasło jest poprawne");
-                return (true, "Zalogowano pomyślnie");
-            }
-            else
-            {
-                Console.WriteLine("Hasło jest niepoprawne");
-                return (false, "Nieprawidłowy login lub hasło");
-            }
-        }
-        private static async Task<Osoby> TryLoginOsobyAsync(MySqlDataReader reader)
-        {
-            var result = new Osoby();
-            using (reader)
-            {
-                while (await reader.ReadAsync())
+                var storedHashedPassword = result.GetString(result.GetOrdinal("password"));
+                if (storedHashedPassword == hashedPassword)
                 {
-                    var osoby = new Osoby
-                    {
-                        Haslo = reader.GetString("Password")
-                    };
-                    osoby.ToString();
-                    result = osoby;
+                    Console.WriteLine("Hasło jest poprawne.");
+                    return (true, "Zalogowano pomyślnie");
+                }
+                else
+                {
+                    Console.WriteLine("Hasło jest niepoprawne.");
+                    return (false, "Nieprawidłowy login lub hasło");
                 }
             }
-            return result;
+            result.Close();
+            Console.WriteLine("Nie znaleziono użytkownika.");
+            return (false, "Nieprawidłowy login lub hasło");
         }
-
 
         public async Task<Osoby> RegisterAsync(string login, string haslo, string email, string imie, string nazwisko, string numerAlbumu, MySqlDataSource database)
         {

@@ -61,6 +61,20 @@ CREATE TABLE `sale` (
   `Komputerowa` int(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 
+
+
+
+CREATE TABLE `sale_dostepnosc` (
+  `ID` INT NOT NULL AUTO_INCREMENT , 
+  `ID_sale` INT NOT NULL , 
+  `ID_osoby` INT NOT NULL , 
+  `Data` DATE NOT NULL , 
+  `Godzina_rozpoczecia` TIME NOT NULL , 
+  `Godzina_zakonczenia` TIME NOT NULL , 
+  PRIMARY KEY (`ID`),
+    FOREIGN KEY (`ID_sale`) REFERENCES sale(ID),
+    FOREIGN KEY (`ID_osoby`) REFERENCES osoby(ID)
+  ) ENGINE = InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 --
 -- Dumping data for table `sale`
 --

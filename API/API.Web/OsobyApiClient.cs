@@ -47,17 +47,9 @@ public class OsobyService : IOsobyService
     {
         var repo = new SaleRepo(_dataSource);
         var result = repo.LoginAsync(login, haslo, _dataSource);
+        await result;
 
-
-        if (result == null)
-        {
-            return (false, "Nieprawidłowy login lub hasło");
-        }
-        else
-        {
-            Console.WriteLine("Hasło jest poprawne");
-            return (true, "Zalogowano pomyślnie");
-        }
+        return result.Result.Success ? (true, "Zalogowano pomyślnie") : (false, "Nieprawidłowy login lub hasło");
     }
 
 
