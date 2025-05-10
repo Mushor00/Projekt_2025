@@ -24,5 +24,14 @@ namespace API.ApiService.DB
         public string? Nazwisko { get; set; }
         public string? NumerAlbumu { get; set; }
     }
+    public class Rezerwacje
+    {
+        public int Id { get; set; }
+        public int ID_sala { get; set; }
+        public int ID_osoby { get; set; }
+        public DateOnly Data { get; set; }
+        public TimeOnly GodzinaRozpoczecia { get; set; }
+        public TimeOnly GodzinaZakonczenia { get; set; }
+    }
 
 }
