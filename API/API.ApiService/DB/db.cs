@@ -70,22 +70,63 @@ namespace API.ApiService.DB
                 command.Parameters.AddWithValue("@Pojemnosc", filter.Pojemnosc.Value);
             }
 
-            if (filter.Projektor == "HDMI")
+            if (filter.Projektor == "VGA")
             {
-                query.Append(" AND ProjektorHDMI = 1");
+                query.Append(" AND Projektor = 1");
             }
-            else if (filter.Projektor == "VGA")
+            else if (filter.Projektor == "HDMI")
             {
-                query.Append(" AND ProjektorVGA = 1");
+                query.Append(" AND Projektor = 2");
             }
+            else if (filter.Projektor == "HDMI/VGA")
+            {
+                query.Append(" AND Projektor = 3");
+            }
+            else if (filter.Projektor == "USB")
+            {
+                query.Append(" AND Projektor = 4");
+            }
+            else if (filter.Projektor == "USB/HDMI")
+            {
+                query.Append(" AND Projektor = 5");
+            }
+            else if (filter.Projektor == "USB/VGA")
+            {
+                query.Append(" AND Projektor = 6");
+            }
+            else if (filter.Projektor == "USB/HDMI/VGA")
+            {
+                query.Append(" AND Projektor = 7");
+            }
+
 
             if (filter.Tablica == "Multimedialna")
             {
-                query.Append(" AND TablicaMultimedialna = 1");
+                query.Append(" AND Tablica = 1");
             }
             else if (filter.Tablica == "Suchoscierna")
             {
-                query.Append(" AND TablicaSuchoscieralna = 1");
+                query.Append(" AND Tablica = 2");
+            }
+            else if (filter.Tablica == "Multimedialna/Suchoscierna")
+            {
+                query.Append(" AND Tablica = 3");
+            }
+            else if (filter.Tablica == "Interaktywna")
+            {
+                query.Append(" AND Tablica = 4");
+            }
+            else if (filter.Tablica == "Interaktywna/Multimedialna")
+            {
+                query.Append(" AND Tablica = 5");
+            }
+            else if (filter.Tablica == "Interaktywna/Suchoscierna")
+            {
+                query.Append(" AND Tablica = 6");
+            }
+            else if (filter.Tablica == "Interaktywna/Multimedialna/Suchoscierna")
+            {
+                query.Append(" AND Tablica = 7");
             }
 
             if (filter.Klimatyzacja.HasValue)
@@ -106,6 +147,11 @@ namespace API.ApiService.DB
                 command.Parameters.AddWithValue("@Status", filter.Dostepnosc);
             }
 
+
+
+            //TODO: Add filtering for Ulica and Niepelnosprawni, zmiana w bazie danych, zmiana projektora i tablicy
+
+
             command.CommandText = query.ToString();
 
             var sales = new List<Sale>();
@@ -120,10 +166,8 @@ namespace API.ApiService.DB
                     Nazwa = reader.GetString(reader.GetOrdinal("Nazwa")),
                     Pietro = reader.GetInt32(reader.GetOrdinal("Piętro")),
                     Pojemnosc = reader.GetInt32(reader.GetOrdinal("Pojemność")),
-                    ProjektorVGA = reader.GetInt32(reader.GetOrdinal("ProjektorVGA")),
-                    ProjektorHDMI = reader.GetInt32(reader.GetOrdinal("ProjektorHDMI")),
-                    TablicaMultimedialna = reader.GetInt32(reader.GetOrdinal("TablicaMultimedialna")),
-                    TablicaSuchoscieralna = reader.GetInt32(reader.GetOrdinal("TablicaSuchoscieralna")),
+                    Projektor = reader.GetInt32(reader.GetOrdinal("Projektor")),
+                    Tablica = reader.GetInt32(reader.GetOrdinal("Tablica")),
                     Klimatyzacja = reader.GetInt32(reader.GetOrdinal("Klimatyzacja")),
                     Komputerowa = reader.GetInt32(reader.GetOrdinal("Komputerowa")),
                 });
@@ -147,12 +191,12 @@ namespace API.ApiService.DB
                         Pietro = reader.GetInt32("piętro"),
                         Pojemnosc = reader.GetInt32("pojemność"),
                         Dostepnosc = reader.GetString("dostępność"),
-                        ProjektorHDMI = reader.GetInt32("ProjektorHDMI"),
-                        ProjektorVGA = reader.GetInt32("ProjektorVGA"),
-                        TablicaMultimedialna = reader.GetInt32("TablicaMultimedialna"),
-                        TablicaSuchoscieralna = reader.GetInt32("TablicaSuchoscieralna"),
+                        Projektor = reader.GetInt32("Projektor"),
+                        Tablica = reader.GetInt32("Tablica"),
                         Klimatyzacja = reader.GetInt32("Klimatyzacja"),
-                        Komputerowa = reader.GetInt32("Komputerowa")
+                        Komputerowa = reader.GetInt32("Komputerowa"),
+                        Ulica = reader.GetString("Ulica"),
+                        Niepelnosprawni = reader.GetInt32("Dla_niepelnosprawnych")
                     };
                     result.Add(sale);
                 }
