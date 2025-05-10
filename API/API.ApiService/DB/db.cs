@@ -160,35 +160,37 @@ namespace API.ApiService.DB
             return result;
         }
 
-        public async Task<(bool Success, string Message)> LoginAsync(string login, string haslo, MySqlDataSource database)
+        public async Task<(bool Success, string Message, Osoby osoba)> LoginAsync(string login, string haslo, MySqlDataSource database)
         {
             using var connection = await database.OpenConnectionAsync();
             using var command = connection.CreateCommand();
-            command.CommandText = "SELECT password FROM osoby WHERE email = @login";
+            command.CommandText = "SELECT imie, password FROM osoby WHERE email = @login";
             command.Parameters.AddWithValue("@login", login);
             var hashedPassword = Hashing.HashPassword(haslo);
 
             var result = await command.ExecuteReaderAsync();
-
 
             if (await result.ReadAsync())
             {
                 var storedHashedPassword = result.GetString(result.GetOrdinal("password"));
                 if (storedHashedPassword == hashedPassword)
                 {
-                    Console.WriteLine("Hasło jest poprawne.");
-                    return (true, "Zalogowano pomyślnie");
-                }
-                else
-                {
-                    Console.WriteLine("Hasło jest niepoprawne.");
-                    return (false, "Nieprawidłowy login lub hasło");
+                    var imie = result.GetString(result.GetOrdinal("imie"));
+            
+                    var osoba = new Osoby
+                    {
+                        Imie = imie
+                    };
+                    
+                    result.Close();
+                    return (true, "Zalogowano pomyślnie", osoba);
                 }
             }
+
             result.Close();
-            Console.WriteLine("Nie znaleziono użytkownika.");
-            return (false, "Nieprawidłowy login lub hasło");
+            return (false, "Nieprawidłowy login lub hasło", null);
         }
+
 
         public async Task<Osoby> RegisterAsync(string login, string haslo, string email, string imie, string nazwisko, string numerAlbumu, MySqlDataSource database)
         {

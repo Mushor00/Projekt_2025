@@ -23,6 +23,10 @@
                 <label class="form-label">Adres e-mail</label>
                 <InputText @bind-Value="loginModel.Username" class="form-control" />
                 <ValidationMessage For="@(() => loginModel.Username)" />
+                @if (!string.IsNullOrWhiteSpace(loginModel.Username) && !string.IsNullOrWhiteSpace(ErrorMessage))
+                {
+                    <div class="text-danger">@ErrorMessage</div>
+                }
             </div>
 
             <div class="mb-3">
@@ -53,31 +57,24 @@
 
             if (success)
             {
-
-                await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "username", loginModel.Username);
-                await JSRuntime.InvokeVoidAsync("sessionStorage.setItem", "email", loginModel.Username); 
-                Session.SetUser(loginModel.Username);
                 await Task.Delay(100);
                 Navigation.NavigateTo("/", forceLoad: true);
             }
             else
             {
-
-                ErrorMessage = message; 
+                ErrorMessage = message;
             }
         }
         catch (Exception ex)
         {
-
             ErrorMessage = $"Wystąpił błąd: {ex.Message}";
         }
         finally
         {
             IsLoggingIn = false;
         }
-        
-        
     }
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
