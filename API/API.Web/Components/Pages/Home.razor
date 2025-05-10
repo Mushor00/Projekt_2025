@@ -32,6 +32,11 @@
                 <option value="">Projektor</option>
                 <option value="HDMI">HDMI</option>
                 <option value="VGA">VGA</option>
+                <option value="USB">USB</option>
+                <option value="VGA/HDMI">VGA/HDMI</option>
+                <option value="USB/VGA">USB/VGA</option>
+                <option value="USB/HDMI">USB/HDMI</option>
+                <option value="USB/HDMI/VGA">USB/HDMI/VGA</option>
             </select>
         </div>
         <div class="col-md-3">
@@ -39,6 +44,11 @@
                 <option value="">Tablica</option>
                 <option value="Multimedialna">Multimedialna</option>
                 <option value="Suchoscierna">Suchościerna</option>
+                <option value="Interaktywna">Interaktywna</option>
+                <option value="Multimedialna/Suchościerna">Multimedialna/Suchościerna</option>
+                <option value="Interaktywna/Multimedialna">Interaktywna/Multimedialna</option>
+                <option value="Interaktywna/Suchościerna">Interaktywna/Suchościerna</option>
+                <option value="Interaktywna/Multimedialna/Suchościerna">Interaktywna/Multimedialna/Suchościerna</option>
             </select>
         </div>
         <div class="col-md-3">
@@ -69,6 +79,7 @@
     </div>
 </div>
 
+<div class="container my-4">
 <table class="table table-striped-columns caption-top">
     <caption>Lista Sal</caption>
     <thead>
@@ -108,17 +119,33 @@
                 <td>@item.Pietro</td>
                 <td>@item.Pojemnosc</td>
                 <td>
-                    @if (item.ProjektorVGA == 1 && item.ProjektorHDMI == 1)
-                    {
-                        <p>VGA/HDMI</p>
-                    }
-                    else if (item.ProjektorVGA == 1)
+                    @if (item.Projektor == 1)
                     {
                         <p>VGA</p>
                     }
-                    else if (item.ProjektorHDMI == 1)
+                    else if (item.Projektor == 2)
                     {
                         <p>HDMI</p>
+                    }
+                    else if (item.Projektor == 3)
+                    {
+                        <p>VGA/HDMI</p>
+                    }
+                    else if (item.Projektor == 4)
+                    {
+                        <p>USB</p>
+                    }
+                    else if (item.Projektor == 5)
+                    {
+                        <p>USB/VGA</p>
+                    }
+                    else if (item.Projektor == 6)
+                    {
+                        <p>USB/HDMI</p>
+                    }
+                    else if (item.Projektor == 7)
+                    {
+                        <p>USB/HDMI/VGA</p>
                     }
                     else
                     {
@@ -126,17 +153,33 @@
                     }
                 </td>
                 <td>
-                    @if (item.TablicaMultimedialna == 1 && item.TablicaSuchoscieralna == 1)
-                    {
-                        <p>Multimedialna/Suchoscierna</p>
-                    }
-                    else if (item.TablicaMultimedialna == 1)
+                    @if (item.Tablica == 1)
                     {
                         <p>Multimedialna</p>
                     }
-                    else if (item.TablicaSuchoscieralna == 1)
+                    else if (item.Tablica == 2)
                     {
-                        <p>Suchościeralna</p>
+                        <p>Suchoscierna</p>
+                    }
+                    else if (item.Tablica == 3)
+                    {
+                        <p>Multimedialna/Suchościeralna</p>
+                    }
+                    else if (item.Tablica == 4)
+                    {
+                        <p>Interaktywna</p>
+                    }
+                    else if (item.Tablica == 5)
+                    {
+                        <p>Interaktywna/Multimedialna</p>
+                    }
+                    else if (item.Tablica == 6)
+                    {
+                        <p>Interaktywna/Suchościeralna</p>
+                    }
+                    else if (item.Tablica == 7)
+                    {
+                        <p>Interaktywna/Multimedialna/Suchościeralna</p>
                     }
                     else
                     {
@@ -165,9 +208,9 @@
                 </td>
                 <td>halooo!!!! pozdrawiam!!!</td>
                 <td>
-                    <a class="btn btn-primary" href='/addSala' role="button">Zarezerwuj</a>
-                    <a class="btn btn-warning" href='/editSala' role="button">Edytuj</a>
-                    <button class="btn btn-danger me-2">Usuń Rezerwacje</button>
+                    <a class="btn btn-primary mb-2" href='/addSala' role="button">Zarezerwuj</a>
+                    <a class="btn btn-warning mb-2" href='/editSala' role="button">Edytuj</a>
+                    <button class="btn btn-danger">Usuń Rezerwacje</button>
                 </td>
             </tr>
             lp++;
@@ -176,7 +219,7 @@
     
     </tbody>
 </table>
-
+</div>
 @code {
     private List<Sale> sales;
     
@@ -211,4 +254,26 @@
         filter = new SaleFilter();
         await ApplyFilters();
     }
+    /*
+    Proejktor:
+    0- Brak
+    1- ProjektorVGA
+    2- ProjektorHDMI
+    3- 1+2
+    4- ProjektorUSB
+    5- 4+1
+    6- 4+2
+    7- 4+2+1
+
+    Tablica:
+    0- Brak
+    1- TablicaMultimedialna
+    2- TablicaSuchoscierna
+    3- 1+2
+    4- TablicaInteraktywna
+    5- 4+1
+    6- 4+2
+    7- 4+2+1
+
+    */
 }

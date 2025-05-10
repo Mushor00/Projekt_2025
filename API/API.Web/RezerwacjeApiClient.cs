@@ -16,7 +16,7 @@ public interface IRezerwacjeService
 
 }
 
-
+/*
 public class RezerwacjeService : IRezerwacjeService
 {
     private readonly MySqlDataSource _dataSource;
@@ -69,4 +69,6 @@ public class RezerwacjeService : IRezerwacjeService
 
         return (true, "Rezerwacja usunięta pomyślnie.");
     }
+    
 }
+*/
