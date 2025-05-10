@@ -5,6 +5,7 @@ using API.ApiService.DB;
 using API.ApiService.hashing;
 using API.Web.Components.Pages;
 using Grpc.Net.Client.Configuration;
+using Microsoft.JSInterop;
 using MySqlConnector;
 
 namespace API.Web;
@@ -17,13 +18,15 @@ public interface IOsobyService
 
 public class OsobyService : IOsobyService
 {
-    private static List<Osoby> _osobyList = new List<Osoby>();
     private readonly MySqlDataSource _dataSource;
+    private readonly UserSessionService _session;
+    private readonly IJSRuntime _jsRuntime;
 
-    public OsobyService(MySqlDataSource dataSource)
+    public OsobyService(MySqlDataSource dataSource, UserSessionService session, IJSRuntime jsRuntime)
     {
-        _dataSource = dataSource ??
-                      throw new ArgumentNullException(nameof(dataSource), "Źródło danych nie może być null");
+        _dataSource = dataSource ?? throw new ArgumentNullException(nameof(dataSource));
+        _session = session ?? throw new ArgumentNullException(nameof(session));
+        _jsRuntime = jsRuntime ?? throw new ArgumentNullException(nameof(jsRuntime));
     }
 
     public async Task<(bool Success, string Message)> RegisterAsync(Register.RegisterModel model)
@@ -46,14 +49,28 @@ public class OsobyService : IOsobyService
     public async Task<(bool Success, string Message)> LoginAsync(string login, string haslo)
     {
         var repo = new SaleRepo(_dataSource);
-        var result = repo.LoginAsync(login, haslo, _dataSource);
-        await result;
+        var result = await repo.LoginAsync(login, haslo, _dataSource);
 
-        return result.Result.Success ? (true, "Zalogowano pomyślnie") : (false, "Nieprawidłowy login lub hasło");
+        if (result.Success)
+        {
+            if (result.osoba is not null)
+            {
+                _session.SetUser(result.osoba.Imie);
+                await _jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "username", login);
+                await _jsRuntime.InvokeVoidAsync("sessionStorage.setItem", "email", login);
+            }
+            else
+            {
+                return (false, "Błąd logowania.");
+            }
+        }
+
+        return result.Success
+            ? (true, "Zalogowano pomyślnie")
+            : (false, "Nieprawidłowy login lub hasło");
     }
-
-
 }
+
 
 
 
