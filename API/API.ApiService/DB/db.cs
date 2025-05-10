@@ -176,12 +176,12 @@ namespace API.ApiService.DB
                 if (storedHashedPassword == hashedPassword)
                 {
                     var imie = result.GetString(result.GetOrdinal("imie"));
-            
+
                     var osoba = new Osoby
                     {
                         Imie = imie
                     };
-                    
+
                     result.Close();
                     return (true, "Zalogowano pomyślnie", osoba);
                 }
@@ -233,6 +233,103 @@ namespace API.ApiService.DB
                 Nazwisko = nazwisko,
                 NumerAlbumu = numerAlbumu
             };
+        }
+
+
+        public async Task<(bool Success, string Message)> AddRezerwacjaAsync(int email, string nazwa, DateOnly data, TimeOnly godzinaRozpoczecia, TimeOnly godzinaZakonczenia, MySqlDataSource database)
+        {
+            // Sprawdzenie, czy sala jest dostępna w danym terminie
+            using var connection = await database.OpenConnectionAsync();
+            using var checkCommand = connection.CreateCommand();
+            checkCommand.CommandText = @"SELECT COUNT(*) FROM rezerwacje WHERE ID_sale = @idSali AND Data = @data AND ((Godzina_Rozpoczecia = @godzinaRozpoczecia AND Godzina_Zakonczenia = @godzinaZakonczenia))";
+            checkCommand.Parameters.AddWithValue("@idSali", nazwa);
+            checkCommand.Parameters.AddWithValue("@data", data);
+            checkCommand.Parameters.AddWithValue("@godzinaRozpoczecia", godzinaRozpoczecia);
+            checkCommand.Parameters.AddWithValue("@godzinaZakonczenia", godzinaZakonczenia);
+            var count = (long)await checkCommand.ExecuteScalarAsync();
+            if (count > 0)
+            {
+                Console.WriteLine("Sala jest już zajęta w tym terminie.");
+                return (false, "Sala jest już zajęta w tym terminie.");
+            }
+
+
+
+
+            int idOsoby;
+            int idSali;
+            using var command = connection.CreateCommand();
+            command.CommandText = "SELECT ID FROM osoby WHERE email = @email";
+            command.Parameters.AddWithValue("@email", email);
+            var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                idOsoby = reader.GetInt32(reader.GetOrdinal("ID"));
+            }
+            else
+            {
+                Console.WriteLine("Nie znaleziono użytkownika.");
+                return (false, "Nie znaleziono użytkownika.");
+            }
+            reader.Close();
+
+
+            command.CommandText = "SELECT ID FROM sale WHERE nazwa = @nazwa";
+            command.Parameters.Clear();
+            command.Parameters.AddWithValue("@numer", nazwa);
+            reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                idSali = reader.GetInt32(reader.GetOrdinal("ID"));
+            }
+            else
+            {
+                Console.WriteLine("Nie znaleziono sali.");
+                return (false, "Nie znaleziono sali.");
+            }
+            reader.Close();
+
+
+            command.CommandText = @"INSERT INTO rezerwacje (ID_osoby, ID_sale, Data, Godzina_Rozpoczecia, Godzina_Zakonczenia) VALUES (@idOsoby, @idSali, @data, @godzinaRozpoczecia, @godzinaZakonczenia)";
+            command.Parameters.AddWithValue("@idOsoby", idOsoby);
+            command.Parameters.AddWithValue("@idSali", idSali);
+            command.Parameters.AddWithValue("@data", data);
+            command.Parameters.AddWithValue("@godzinaRozpoczecia", godzinaRozpoczecia);
+            command.Parameters.AddWithValue("@godzinaZakonczenia", godzinaZakonczenia);
+
+            await command.ExecuteNonQueryAsync();
+
+            Console.WriteLine("Rezerwacja została dodana.");
+            return (true, "Rezerwacja została dodana.");
+        }
+
+        public async Task<(bool Success, string Message)> UpdateRezerwacjaAsync(Rezerwacje rezerwacja)
+        {
+            using var connection = await database.OpenConnectionAsync();
+            using var command = connection.CreateCommand();
+            command.CommandText = @"UPDATE rezerwacje SET ID_osoby = @idOsoby, ID_sale = @idSali, Data = @data, Godzina_Rozpoczecia = @godzinaRozpoczecia, Godzina_Zakonczenia = @godzinaZakonczenia WHERE ID = @id";
+            command.Parameters.AddWithValue("@id", rezerwacja.Id);
+            command.Parameters.AddWithValue("@idOsoby", rezerwacja.ID_osoby);
+            command.Parameters.AddWithValue("@idSali", rezerwacja.ID_sala);
+            command.Parameters.AddWithValue("@data", rezerwacja.Data);
+            command.Parameters.AddWithValue("@godzinaRozpoczecia", rezerwacja.GodzinaRozpoczecia);
+            command.Parameters.AddWithValue("@godzinaZakonczenia", rezerwacja.GodzinaZakonczenia);
+
+            await command.ExecuteNonQueryAsync();
+
+            return (true, "Rezerwacja została zaktualizowana.");
+        }
+
+        public async Task<(bool Success, string Message)> DeleteRezerwacjaAsync(int id)
+        {
+            using var connection = await database.OpenConnectionAsync();
+            using var command = connection.CreateCommand();
+            command.CommandText = "DELETE FROM rezerwacje WHERE ID = @id";
+            command.Parameters.AddWithValue("@id", id);
+
+            await command.ExecuteNonQueryAsync();
+
+            return (true, "Rezerwacja została usunięta.");
         }
 
     }
