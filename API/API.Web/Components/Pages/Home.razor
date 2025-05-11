@@ -66,8 +66,22 @@
             </select>
         </div>
         <div class="col-md-3">
+            <select class="form-select" @bind="filter.Ulica">
+                <option value="">Filtruj po ulicy</option>
+                <option value="Kilińskiego">Kilińskiego</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" @bind="filter.Niepelnosprawni">
+                <option value="">Dla Niepełnosprawnych</option>
+                <option value="1">Tak</option>
+                <option value="0">Nie</option>
+            </select>   
+        </div>
+        
+        <div class="col-md-3">
             <select class="form-select" @bind="filter.Dostepnosc">
-                <option value="">Wszystkie</option>
+                <option value="">Dostepność</option>
                 <option value="Dostępna">Dostępna</option>
                 <option value="Zajęta">Zajęta</option>
             </select>
@@ -79,7 +93,7 @@
     </div>
 </div>
 
-<div class="container my-4">
+<div class="container mx-5 my-4">
 <table class="table table-striped-columns caption-top">
     <caption>Lista Sal</caption>
     <thead>
@@ -131,7 +145,7 @@
                     }
                     else if (item.Projektor == 3)
                     {
-                        <p>HDMI/VGA</p>
+                        <p>HDMI<br> VGA</p>
                     }
                     else if (item.Projektor == 4)
                     {
@@ -139,15 +153,15 @@
                     }
                     else if (item.Projektor == 5)
                     {
-                        <p>USB/VGA</p>
+                        <p>USB<br> VGA</p>
                     }
                     else if (item.Projektor == 6)
                     {
-                        <p>USB/HDMI</p>
+                        <p>USB<br> HDMI</p>
                     }
                     else if (item.Projektor == 7)
                     {
-                        <p>USB/HDMI/VGA</p>
+                        <p>USB HDMI VGA</p>
                     }
                     else
                     {
@@ -165,7 +179,7 @@
                     }
                     else if (item.Tablica == 3)
                     {
-                        <p>Multimedialna/Suchościeralna</p>
+                        <p>Multimedialna Suchościeralna</p>
                     }
                     else if (item.Tablica == 4)
                     {
@@ -173,15 +187,15 @@
                     }
                     else if (item.Tablica == 5)
                     {
-                        <p>Interaktywna/Multimedialna</p>
+                        <p>Interaktywna Multimedialna</p>
                     }
                     else if (item.Tablica == 6)
                     {
-                        <p>Interaktywna/Suchościeralna</p>
+                        <p>Interaktywna Suchościeralna</p>
                     }
                     else if (item.Tablica == 7)
                     {
-                        <p>Interaktywna/Multimedialna/Suchościeralna</p>
+                        <p>Interaktywna Multimedialna Suchościeralna</p>
                     }
                     else
                     {
@@ -219,7 +233,7 @@
                         <p>Nie</p>
                     }
                 </td>
-                <td>halooo!!!! pozdrawiam!!!</td>
+                <td>@item.Dostepnosc</td>
                 <td>
                     <a class="btn btn-primary mb-2" href='/addSala' role="button">Zarezerwuj</a>
                     <a class="btn btn-warning mb-2" href='/editSala' role="button">Edytuj</a>

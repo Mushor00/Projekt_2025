@@ -129,16 +129,28 @@ namespace API.ApiService.DB
                 query.Append(" AND Tablica = 7");
             }
 
+            if (filter.Ulica == "Kilińskiego")
+            {
+                query.Append(" AND Ulica = Kilińskiego");
+            }
+
+            if (filter.Niepelnosprawni.HasValue)
+            {
+                query.Append(" AND Dla_niepelnosprawnych = @Niepelnosprawni");
+                command.Parameters.AddWithValue("@Niepelnosprawni", filter.Niepelnosprawni.Value);
+            }
+
+
             if (filter.Klimatyzacja.HasValue)
             {
                 query.Append(" AND Klimatyzacja = @Klimatyzacja");
-                command.Parameters.AddWithValue("@Klimatyzacja", filter.Klimatyzacja.Value ? 1 : 0);
+                command.Parameters.AddWithValue("@Klimatyzacja", filter.Klimatyzacja.Value);
             }
 
             if (filter.Komputerowa.HasValue)
             {
                 query.Append(" AND Komputerowa = @Komputerowa");
-                command.Parameters.AddWithValue("@Komputerowa", filter.Komputerowa.Value ? 1 : 0);
+                command.Parameters.AddWithValue("@Komputerowa", filter.Komputerowa.Value);
             }
 
             if (!string.IsNullOrWhiteSpace(filter.Dostepnosc))
