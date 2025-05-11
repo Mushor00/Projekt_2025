@@ -108,7 +108,7 @@ namespace API.ApiService.DB
             {
                 query.Append(" AND Tablica = 2");
             }
-            else if (filter.Tablica == "Multimedialna/Suchoscierna")
+            else if (filter.Tablica == "Multimedialna/Suchościerna")
             {
                 query.Append(" AND Tablica = 3");
             }
@@ -120,11 +120,11 @@ namespace API.ApiService.DB
             {
                 query.Append(" AND Tablica = 5");
             }
-            else if (filter.Tablica == "Interaktywna/Suchoscierna")
+            else if (filter.Tablica == "Interaktywna/Suchościerna")
             {
                 query.Append(" AND Tablica = 6");
             }
-            else if (filter.Tablica == "Interaktywna/Multimedialna/Suchoscierna")
+            else if (filter.Tablica == "Interaktywna/Multimedialna/Suchościerna")
             {
                 query.Append(" AND Tablica = 7");
             }

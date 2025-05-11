@@ -33,9 +33,9 @@
                 <option value="HDMI">HDMI</option>
                 <option value="VGA">VGA</option>
                 <option value="USB">USB</option>
-                <option value="VGA/HDMI">VGA/HDMI</option>
-                <option value="USB/VGA">USB/VGA</option>
-                <option value="USB/HDMI">USB/HDMI</option>
+                <option value="HDMI/VGA">HDMI/VGA</option>
+                <option value="USB/VGA">USB/HDMI</option>
+                <option value="USB/HDMI">USB/VGA</option>
                 <option value="USB/HDMI/VGA">USB/HDMI/VGA</option>
             </select>
         </div>
@@ -94,6 +94,8 @@
         <th scope="col">Tablica</th>
         <th scope="col">Klimatyzacja</th>
         <th scope="col">Sala Komputerowa</th>
+        <th scope="col">Ulica</th>
+        <th scope="col">Dostępna dla niepełnosprawnych</th>
         <th scope="col">Dostepność</th>
         <th scope="col"></th>
     </tr>
@@ -129,7 +131,7 @@
                     }
                     else if (item.Projektor == 3)
                     {
-                        <p>VGA/HDMI</p>
+                        <p>HDMI/VGA</p>
                     }
                     else if (item.Projektor == 4)
                     {
@@ -198,6 +200,17 @@
                 </td>
                 <td>
                     @if (item.Komputerowa == 1)
+                    {
+                        <p>Tak</p>
+                    }
+                    else
+                    {
+                        <p>Nie</p>
+                    }
+                </td>
+                <td>@item.Ulica</td>
+                <td>
+                    @if(item.Niepelnosprawni == 1)
                     {
                         <p>Tak</p>
                     }
