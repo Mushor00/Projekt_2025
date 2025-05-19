@@ -1,39 +1,46 @@
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 using API.ApiService.DB;
-using Swashbuckle.AspNetCore.Swagger;
-using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add service defaults & Aspire client integrations.
+// Dodaj integracje Aspire + problemy HTTP
 builder.AddServiceDefaults();
-
-// Add services to the container.
 builder.Services.AddProblemDetails();
 
+// Swagger / OpenAPI
+builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+// Dodaj MySQL
+builder.AddMySqlDataSource("MyDatabase", options =>
+{
+    options.ConnectionString = "Server=localhost;Database=san;User ID=oskar;Password=1234;Port=3306;";
+});
+
+// Dodaj repozytorium (wstrzykiwanie zale¿noœci)
+builder.Services.AddScoped<SaleRepo>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Middleware b³êdów
 app.UseExceptionHandler();
 
+// Swagger w trybie dev
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
 
-app.MapGet("/weatherforecast", async ([FromServices] MySqlDataSource db) =>
+// Endpoint testowy
+app.MapGet("/api/sale", async ([FromServices] SaleRepo repo) =>
 {
-    var repository = new SaleRepo(db);
-    return await repository.GetSaleAsync();
+    var result = await repo.GetSaleAsync();
+    return result is not null ? Results.Ok(result) : Results.NotFound();
 });
 
+// Domyœlne endpointy Aspire
 app.MapDefaultEndpoints();
 
 app.Run();
