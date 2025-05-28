@@ -1,45 +1,83 @@
 ﻿@page "/addSala"
+@inject ReservationApiClient Api
 @inject NavigationManager Navigation
 
-<PageTitle>Rezerwacja Sal</PageTitle>
+<PageTitle>Dodaj Rezerwację</PageTitle>
 
-<div class="d-flex flex-column justify-content-center align-items-center">
-    <h1>Rezerwacja Sal</h1>
+<h1 class="text-center">Dodaj Rezerwację</h1>
 
-    <div style="width: 300px;">
+<EditForm Model="rezerwacja" OnValidSubmit="ZarezerwujSale">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div style="max-width: 400px; margin: auto;">
         <div class="mb-3">
-            <div class="mb-3">
-                <label class="form-label">Wybierz Sale</label>
-                <select class="form-select">
-                    <option selected disabled>Wybierz salę...</option>
-                    <option value="1">PRZYKALD</option>
-                    <option value="2">PRZYKALD</option>
-                    <option value="3">PRZYKALD</option>
-                </select>
-            </div>
+            <label class="form-label">Wybierz salę</label>
+            <InputSelect class="form-select" @bind-Value="rezerwacja.NumerSali">
+                <option disabled selected value="">-- wybierz --</option>
+                <option value="1">Sala 1</option>
+                <option value="2">Sala 2</option>
+                <option value="3">Sala 3</option>
+            </InputSelect>
         </div>
+
         <div class="mb-3">
             <label class="form-label">Data</label>
-            <input type="date" class="form-control">
+            <InputDate class="form-control" @bind-Value="dataDzien" />
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Godzina od</label>
-            <input type="time" class="form-control">
+            <label class="form-label">Godzina od (np. 09:00)</label>
+            <InputText class="form-control" @bind-Value="godzinaOdTekst" />
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Godzina do</label>
-            <input type="time" class="form-control">
+            <label class="form-label">Godzina do (np. 10:00)</label>
+            <InputText class="form-control" @bind-Value="godzinaDoTekst" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Rezerwujący</label>
-            <input type="text" class="form-control">
+            <InputText class="form-control" @bind-Value="rezerwacja.Login" />
         </div>
 
-        <button class="btn btn-primary me-2">Dodaj</button>
-        <a class="btn btn-danger" href="#" role="button">Anuluj</a>
-    </div>
-</div>
+        <div class="d-flex justify-content-between">
+            <button type="submit" class="btn btn-primary">Dodaj</button>
+            <a class="btn btn-danger" href="/">Anuluj</a>
+        </div>
 
+        @if (!string.IsNullOrEmpty(wiadomosc))
+        {
+            <div class="alert alert-info mt-3">@wiadomosc</div>
+        }
+    </div>
+</EditForm>
+
+@code {
+    private RezerwacjaRequest rezerwacja = new();
+    private string wiadomosc = "";
+
+    private DateTime dataDzien = DateTime.Today;
+    private string godzinaOdTekst = "09:00";
+    private string godzinaDoTekst = "10:00";
+
+    private async Task ZarezerwujSale()
+    {
+        // Próba sparsowania godzin
+        if (TimeSpan.TryParse(godzinaOdTekst, out var godzOd) &&
+            TimeSpan.TryParse(godzinaDoTekst, out var godzDo))
+        {
+            rezerwacja.DataOd = dataDzien.Date + godzOd;
+            rezerwacja.DataDo = dataDzien.Date + godzDo;
+
+            var sukces = await Api.ZarezerwujSaleAsync(rezerwacja);
+            wiadomosc = sukces
+                ? "Rezerwacja zakończona sukcesem"
+                : "Rezerwacja nie powiodła się — możliwy konflikt";
+        }
+        else
+        {
+            wiadomosc = "Niepoprawny format godziny. Użyj np. 09:00.";
+        }
+    }
+}

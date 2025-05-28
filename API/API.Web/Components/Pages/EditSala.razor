@@ -1,43 +1,93 @@
 ﻿@page "/editSala"
+@inject HttpClient Http
 
-<PageTitle>Edycja Rezerwacji</PageTitle>
+<h3>Edycja sal</h3>
 
-<div class="d-flex flex-column justify-content-center align-items-center">
-    <h1>Edytuj Rezerwacje Sali</h1>
+@if (sale == null)
+{
+    <p><em>Ładowanie sal...</em></p>
+}
+else
+{
+    <EditForm Model="selectedSala" OnValidSubmit="ZapiszSale">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
 
-    <form style="width: 300px;">
         <div class="mb-3">
+            <label>Wybierz salę</label>
+            <select class="form-select" @onchange="OnSalaChanged">
+                <option value="">-- wybierz --</option>
+                @foreach (var s in sale)
+                {
+                    <option value="@s.Id">@s.Nazwa</option>
+                }
+            </select>
+        </div>
+
+        @if (selectedSala != null)
+        {
             <div class="mb-3">
-                <label class="form-label">Wybierz Sale</label>
-                <select class="form-select">
-                    <option selected disabled>Wybierz salę...</option>
-                    <option value="1">PRZYKALD</option>
-                    <option value="2">PRZYKALD</option>
-                    <option value="3">PRZYKALD</option>
-                </select>
+                <label>Numer</label>
+                <InputNumber class="form-control" @bind-Value="selectedSala.Numer" />
             </div>
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Data</label>
-            <input type="date" class="form-control">
-        </div>
+            <div class="mb-3">
+                <label>Budynek</label>
+                <InputText class="form-control" @bind-Value="selectedSala.Budynek" />
+            </div>
+            <div class="mb-3">
+                <label>Nazwa</label>
+                <InputText class="form-control" @bind-Value="selectedSala.Nazwa" />
+            </div>
+            <div class="mb-3">
+                <label>Piętro</label>
+                <InputNumber class="form-control" @bind-Value="selectedSala.Pietro" />
+            </div>
+            <div class="mb-3">
+                <label>Pojemność</label>
+                <InputNumber class="form-control" @bind-Value="selectedSala.Pojemnosc" />
+            </div>
+            <div class="mb-3">
+                <label>Dostępna</label>
+                <InputCheckbox class="form-check-input" @bind-Value="selectedSala.Dostepna" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Godzina od</label>
-            <input type="time" class="form-control">
-        </div>
+            <button type="submit" class="btn btn-primary">Zapisz</button>
+        }
+    </EditForm>
+}
 
-        <div class="mb-3">
-            <label class="form-label">Godzina do</label>
-            <input type="time" class="form-control">
-        </div>
+@code {
+    private List<Sala> sale;
+    private Sala selectedSala;
 
-        <div class="mb-3">
-            <label class="form-label">Rezerwujący</label>
-            <input type="text" class="form-control">
-        </div>
+    protected override async Task OnInitializedAsync()
+    {
+        sale = await Http.GetFromJsonAsync<List<Sala>>("/api/sale");
+    }
 
-        <button type="submit" class="btn btn-primary me-2">Zapisz </button>
-        <a class="btn btn-danger" href="#" role="button">Anuluj</a>
-    </form>
-</div>
+    private void OnSalaChanged(ChangeEventArgs e)
+    {
+        var id = int.Parse(e.Value.ToString());
+        selectedSala = sale.FirstOrDefault(s => s.Id == id);
+    }
+
+    private async Task ZapiszSale()
+    {
+        var response = await Http.PutAsJsonAsync($"/api/sale/{selectedSala.Id}", selectedSala);
+        if (response.IsSuccessStatusCode)
+        {
+            await OnInitializedAsync();
+        }
+    }
+
+    public class Sala
+    {
+        public int Id { get; set; }
+        public int Numer { get; set; }
+        public string Budynek { get; set; }
+        public string Nazwa { get; set; }
+        public int Pietro { get; set; }
+        public int Pojemnosc { get; set; }
+        public bool Dostepna { get; set; }
+    }
+}
