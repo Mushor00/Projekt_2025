@@ -128,10 +128,11 @@ namespace API.ApiService.DB
             {
                 query.Append(" AND Tablica = 7");
             }
-
-            if (filter.Ulica == "Kilińskiego")
+            
+            if (!string.IsNullOrWhiteSpace(filter.Ulica))
             {
-                query.Append(" AND Ulica = Kilińskiego");
+                query.Append(" AND Ulica LIKE @Ulica");
+                command.Parameters.AddWithValue("@Ulica", $"%{filter.Ulica}%");
             }
 
             if (filter.Niepelnosprawni.HasValue)
@@ -158,12 +159,7 @@ namespace API.ApiService.DB
                 query.Append(" AND Status = @Status");
                 command.Parameters.AddWithValue("@Status", filter.Dostepnosc);
             }
-
-
-
-            //TODO: Add filtering for Ulica and Niepelnosprawni, zmiana w bazie danych, zmiana projektora i tablicy
-
-
+            
             command.CommandText = query.ToString();
 
             var sales = new List<Sale>();
@@ -182,6 +178,8 @@ namespace API.ApiService.DB
                     Tablica = reader.GetInt32(reader.GetOrdinal("Tablica")),
                     Klimatyzacja = reader.GetInt32(reader.GetOrdinal("Klimatyzacja")),
                     Komputerowa = reader.GetInt32(reader.GetOrdinal("Komputerowa")),
+                    Niepelnosprawni = reader.GetInt32(reader.GetOrdinal("Dla_niepelnosprawnych")),
+                    Ulica = reader.GetString(reader.GetOrdinal("Ulica")),
                 });
             }
 
