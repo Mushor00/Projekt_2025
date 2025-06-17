@@ -22,9 +22,9 @@ SET time_zone = "+00:00";
 --
 CREATE DATABASE IF NOT EXISTS `san` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 --
-CREATE USER if not EXISTS `oskar`@`localhost`;
+CREATE USER if not EXISTS `oskar`@`localhost` IDENTIFIED BY '1234';
 --
-GRANT ALL PRIVILEGES ON `san`.* TO 'oskar'@'localhost' IDENTIFIED BY '1234';
+GRANT ALL PRIVILEGES ON `san`.* TO 'oskar'@'localhost';
 -- --------------------------------------------------------
 USE `san`;
 

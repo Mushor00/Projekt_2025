@@ -4,7 +4,6 @@ using API.ApiService;
 using API.ApiService.DB;
 using API.ApiService.hashing;
 using API.Web.Components.Pages;
-using Grpc.Net.Client.Configuration;
 using Microsoft.JSInterop;
 using MySqlConnector;
 

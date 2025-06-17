@@ -4,10 +4,10 @@ using API.ApiService;
 using API.ApiService.DB;
 using API.ApiService.hashing;
 using API.Web.Components.Pages;
-using Grpc.Net.Client.Configuration;
 using MySqlConnector;
 
 namespace API.Web;
+
 public interface IRezerwacjeService
 {
     Task<(bool Success, string Message)> AddRezerwacjaAsync(Rezerwacje rezerwacja);
