@@ -21,9 +21,10 @@ public class ReservationRepo(MySqlDataSource database)
         if (kolizje > 0) return false;
 
         cmd.CommandText = """
-            INSERT INTO rezerwacje (numerSali, loginOsoby, dataOd, dataDo) 
-            VALUES (@numerSali, @login, @dataOd, @dataDo)
-        """;
+    INSERT INTO rezerwacje (numerSali, login, dataOd, dataDo) 
+    VALUES (@numerSali, @login, @dataOd, @dataDo)
+""";
+
         cmd.Parameters.AddWithValue("@login", login);
         await cmd.ExecuteNonQueryAsync();
         return true;
