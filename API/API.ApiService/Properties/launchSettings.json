@@ -6,10 +6,6 @@
       "Microsoft.Hosting.Lifetime": "Information"
     }
   },
-  "AllowedHosts": "*",
-  "ConnectionStrings": {
-    "Default": "Server=localhost;User ID=root;Database=san"
-  },
 
   "$schema": "https://json.schemastore.org/launchsettings.json",
   "profiles": {

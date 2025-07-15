@@ -16,10 +16,7 @@ builder.Services.AddServerSideBlazor()
     .AddCircuitOptions(options => { options.DetailedErrors = true; });
 
 
-builder.AddMySqlDataSource("MyDatabase", builder =>
-{
-    builder.ConnectionString = "Server=localhost;Database=san;User ID=root;Password=;Port=3306;";
-});
+builder.AddMySqlDataSource("san");
 
 builder.Services.AddScoped<UserSessionService>();
 builder.Services.AddAntiforgery();

@@ -2,25 +2,20 @@ using Microsoft.AspNetCore.Mvc;
 using API.ApiService;
 using API.ApiService.DB;
 using API.ApiService.Models;
-using MySqlConnector;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
-// === Rejestracja zale¿noœci ===
+// === Rejestracja zaleï¿½noï¿½ci ===
 builder.Services.AddScoped<ReservationRepo>();
 builder.Services.AddScoped<ReservationService>();
 builder.Services.AddScoped<SalaRepo>();
 builder.Services.AddScoped<SalaService>();
+builder.Services.AddScoped<DatabaseInitializer>();
 
-// Dodaj MySQL
-builder.AddMySqlDataSource("MyDatabase", options =>
-{
-    options.ConnectionString = "Server=localhost;Database=san;User ID=oskar;Password=1234;Port=3306;";
-});
+builder.AddMySqlDataSource(connectionName: "san");
 
-
-
-// === CORS dla po³¹czenia z frontem ===
+// === CORS dla poï¿½ï¿½czenia z frontem ===
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -34,7 +29,14 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseCors(); // U¿yj CORS przed jakimikolwiek endpointami
+// === Inicjalizacja bazy danych ===
+using (var scope = app.Services.CreateScope())
+{
+    var initializer = scope.ServiceProvider.GetRequiredService<DatabaseInitializer>();
+    await initializer.InitializeAsync();
+}
+
+app.UseCors(); // Uï¿½yj CORS przed jakimikolwiek endpointami
 
 if (!app.Environment.IsDevelopment())
 {
@@ -50,7 +52,7 @@ app.UseRouting();
 var rezerwacje = app.MapGroup("/api/rezerwacje");
 
 rezerwacje.MapPost("/rezerwuj", async (
-    [FromBody] RezerwacjaRequest request, // <-- u¿yj RezerwacjaRequest
+    [FromBody] RezerwacjaRequest request, // <-- uï¿½yj RezerwacjaRequest
     ReservationService reservationService) =>
 {
     var sukces = await reservationService.ZarezerwujSaleAsync(
@@ -61,8 +63,8 @@ rezerwacje.MapPost("/rezerwuj", async (
     );
 
     return sukces
-        ? Results.Ok(new { message = "Sala zarezerwowana pomyœlnie!" })
-        : Results.Conflict(new { message = "Sala jest ju¿ zajêta w tym terminie." });
+        ? Results.Ok(new { message = "Sala zarezerwowana pomyï¿½lnie!" })
+        : Results.Conflict(new { message = "Sala jest juï¿½ zajï¿½ta w tym terminie." });
 });
 
 rezerwacje.MapDelete("/usun/{idRezerwacji}", async (
@@ -71,7 +73,7 @@ rezerwacje.MapDelete("/usun/{idRezerwacji}", async (
 {
     var sukces = await reservationService.UsunRezerwacjeAsync(idRezerwacji);
     return sukces
-        ? Results.Ok(new { message = "Rezerwacja usuniêta." })
+        ? Results.Ok(new { message = "Rezerwacja usuniï¿½ta." })
         : Results.NotFound(new { message = "Nie znaleziono rezerwacji." });
 });
 
@@ -83,7 +85,7 @@ rezerwacje.MapPut("/edytuj/{idRezerwacji}", async (
     var sukces = await reservationService.EdytujRezerwacjeAsync(idRezerwacji, request.NowaDataOd, request.NowaDataDo);
     return sukces
         ? Results.Ok(new { message = "Rezerwacja zaktualizowana." })
-        : Results.Conflict(new { message = "Nie uda³o siê zaktualizowaæ rezerwacji." });
+        : Results.Conflict(new { message = "Nie udaï¿½o siï¿½ zaktualizowaï¿½ rezerwacji." });
 });
 var sale = app.MapGroup("/api/sale");
 

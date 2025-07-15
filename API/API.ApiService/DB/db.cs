@@ -1,5 +1,4 @@
 using System.Data.Common;
-using MySqlConnector;
 using API.ApiService.hashing;
 using Microsoft.VisualBasic;
 using System.Security.Principal;
@@ -7,7 +6,8 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using API.ApiService.Filters;
 using Microsoft.AspNetCore.Mvc;
-
+using Aspire.MySqlConnector;
+using MySqlConnector;
 
 namespace API.ApiService.DB
 {
@@ -128,7 +128,7 @@ namespace API.ApiService.DB
             {
                 query.Append(" AND Tablica = 7");
             }
-            
+
             if (!string.IsNullOrWhiteSpace(filter.Ulica))
             {
                 query.Append(" AND Ulica LIKE @Ulica");
@@ -159,7 +159,7 @@ namespace API.ApiService.DB
                 query.Append(" AND Status = @Status");
                 command.Parameters.AddWithValue("@Status", filter.Dostepnosc);
             }
-            
+
             command.CommandText = query.ToString();
 
             var sales = new List<Sale>();
