@@ -1,4 +1,4 @@
-﻿@page "/editSala"
+@page "/editSala"
 @inject HttpClient Http
 
 <h3>Edycja sal</h3>
@@ -30,26 +30,26 @@ else
                 <label>Numer</label>
                 <InputNumber class="form-control" @bind-Value="selectedSala.Numer" />
             </div>
-            <div class="mb-3">
-                <label>Budynek</label>
-                <InputText class="form-control" @bind-Value="selectedSala.Budynek" />
-            </div>
-            <div class="mb-3">
-                <label>Nazwa</label>
-                <InputText class="form-control" @bind-Value="selectedSala.Nazwa" />
-            </div>
-            <div class="mb-3">
-                <label>Piętro</label>
-                <InputNumber class="form-control" @bind-Value="selectedSala.Pietro" />
-            </div>
-            <div class="mb-3">
-                <label>Pojemność</label>
-                <InputNumber class="form-control" @bind-Value="selectedSala.Pojemnosc" />
-            </div>
-            <div class="mb-3">
-                <label>Dostępna</label>
-                <InputCheckbox class="form-check-input" @bind-Value="selectedSala.Dostepna" />
-            </div>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Data</label>
+            <input type="date" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Godzina od</label>
+            <input type="time" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Godzina do</label>
+            <input type="time" class="form-control">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Rezerwujący</label>
+            <input type="text" class="form-control">
+        </div>
 
             <button type="submit" class="btn btn-primary">Zapisz</button>
         }

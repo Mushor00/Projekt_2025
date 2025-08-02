@@ -1,0 +1,94 @@
+﻿@page "/calendar"
+@using API.ApiService.DB
+@using API.ApiService.Filters
+@inject ISaleApiClient SaleApiClient
+@rendermode InteractiveServer
+
+<h2 class="text-center mb-4">Kalendarz rezerwacji</h2>
+
+@if (sales is null)
+{
+    <p><em>Ładowanie...</em></p>
+}
+else
+{
+    <div class="container mb-4">
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Sala</th>
+                @for (int hour = 8; hour <= 18; hour++)
+                {
+                    <th>@($"{hour}:00")</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var sala in sales)
+            {
+                <tr>
+                    <td><strong>@sala.Nazwa</strong></td>
+                        @for (int hour = 8; hour <= 18; hour++)
+                        {
+                            //Rezerwacje
+                            @if (sala.Nazwa == "K21" && hour == 9)
+                            {
+                                <td colspan="2" class="bg-info text-white text-center align-middle">
+                                    <div><strong>Bazy Danych</strong></div>
+                                    <div>Prof. Nowak</div>
+                                </td>
+                                hour++;
+                            }
+                            else if (sala.Nazwa == "P21" && hour == 10)
+                            {
+                                <td colspan="2" class="bg-info text-white text-center align-middle">
+                                    <div><strong>Inzyniera Oprogramowania</strong></div>
+                                    <div>Prof. Nowak</div>
+                                </td>
+                                hour++;
+                            }
+                            else if (sala.Nazwa == "A1" && hour == 11)
+                            {
+                                <td colspan="2" class="bg-info text-white text-center align-middle">
+                                    <div><strong>Systemy Szkieletowe</strong></div>
+                                    <div>Prof. Nowak</div>
+                                </td>
+                                hour++;
+                            }
+                            else if (sala.Nazwa == "K42" && hour == 15)
+                            {
+                                <td colspan="2" class="bg-info text-white text-center align-middle">
+                                    <div><strong>Ochrona Danych</strong></div>
+                                    <div>Prof. Nowak</div>
+                                </td>
+                                hour++;
+                            }
+                            else
+                            {
+                                <td></td>
+                            }
+
+                        }
+
+                </tr>
+            }
+        </tbody>
+    </table>
+    </div>
+}
+
+@code {
+    private List<Sale> sales;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            sales = await SaleApiClient.IGetSaleAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd w komponencie: " + ex.Message);
+        }
+    }
+}

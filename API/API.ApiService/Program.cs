@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using API.ApiService;
 using API.ApiService.DB;
 using API.ApiService.Models;

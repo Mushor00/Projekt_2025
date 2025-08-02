@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using API.ApiService.DB
 @using API.ApiService.Filters
 @inject ISaleApiClient SaleApiClient
@@ -95,7 +95,7 @@
     </div>
 </div>
 
-<div class="container mx-5 my-4">
+<div class="container my-1">
 <table class="table table-striped-columns caption-top">
     <caption>Lista Sal</caption>
     <thead>
@@ -105,146 +105,100 @@
         <th scope="col">Budynek</th>
         <th scope="col">Nazwa</th>
         <th scope="col">Piętro</th>
-        <th scope="col">Pojemność</th>
-        <th scope="col">Projektor</th>
-        <th scope="col">Tablica</th>
-        <th scope="col">Klimatyzacja</th>
-        <th scope="col">Sala Komputerowa</th>
         <th scope="col">Ulica</th>
-        <th scope="col">Dostępna dla niepełnosprawnych</th>
         <th scope="col">Dostepność</th>
-        <th scope="col"></th>
+        <th scope="col">Szczegóły</th>
     </tr>
 
     </thead>
     <tbody>
-    @{
-        int lp = 1;
-    }
-    @if (sales is null)
-    {
-        <p>Brak Sal</p>
-    }
-    else
-    {
-        @foreach (var item in sales)
-        {
-            <tr>
-                <th scope="row">@lp</th>
-                <td>@item.Numer</td>
-                <td>@item.Budynek</td>
-                <td>@item.Nazwa</td>
-                <td>@item.Pietro</td>
-                <td>@item.Pojemnosc</td>
-                <td>
-                    @if (item.Projektor == 1)
+            @{
+                int lp = 1;
+            }
+
+            @if (sales is null)
+            {
+                <p>Brak Sal</p>
+            }
+            else
+            {
+                foreach (var item in sales)
+                {
+                    var currentLp = lp; // zapisujemy bieżącą wartość lp do zmiennej lokalnej
+
+                    <tr>
+                        <th scope="row">@currentLp</th>
+                        <td>@item.Numer</td>
+                        <td>@item.Budynek</td>
+                        <td>@item.Nazwa</td>
+                        <td>@item.Pietro</td>
+                        <td>@item.Ulica</td>
+                        <td>@item.Dostepnosc</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" @onclick="@(() => ToggleDetails(currentLp))">
+                                @(expandedRows.Contains(currentLp) ? "Ukryj" : "Rozwiń")
+                            </button>
+                        </td>
+                    </tr>
+
+                    @if (expandedRows.Contains(currentLp))
                     {
-                        <p>VGA</p>
+                        <tr>
+                            <td colspan="7" class="bg-light">
+                                <div class="row">
+                                    <!-- Lewa kolumna -->
+                                    <div class="col-md-5">
+                                        <div><strong>Pojemność:</strong> @item.Pojemnosc</div>
+                                        <div><strong>Projektor:</strong> @ProjektorText(item.Projektor)</div>
+                                        <div><strong>Tablica:</strong> @TablicaText(item.Tablica)</div>
+                                        <div><strong>Klimatyzacja:</strong> @(item.Klimatyzacja == 1 ? "Tak" : "Nie")</div>
+                                        <div><strong>Sala komputerowa:</strong> @(item.Komputerowa == 1 ? "Tak" : "Nie")</div>
+                                        <div><strong>Dla niepełnosprawnych:</strong> @(item.Niepelnosprawni == 1 ? "Tak" : "Nie")</div>
+                                    </div>
+
+                                    <!-- Środkowa kolumna -->
+                                    <div class="col-md-4">
+                                        <div><strong>Rezerwacja:</strong></div>
+                                        <div><strong>Data:</strong> 2025-07-01</div>
+                                        <div><strong>Od godz.:</strong> 10:00</div>
+                                        <div><strong>Do godz.:</strong> 12:00</div>
+                                        <div><strong>Nazwa Przedmiotu:</strong> Inzynieria Oprogramowania</div>
+                                        <div><strong>Rezerwujący:</strong> Jan Kowalski</div>
+                                    </div>
+
+                                    <!-- Kalendarz -->
+                                    <div class="col-md-3">
+                                        <div class="calendar border p-2 rounded text-center">
+                                            <div><strong>Lipiec 2025</strong></div>
+                                            <div class="d-flex flex-wrap justify-content-center">
+                                                @for (int i = 1; i <= 31; i++)
+                                                {
+                                                    bool isReservedDay = (i == 1);
+                                                    <div class="m-1 px-2 py-1 border rounded @(isReservedDay ? "bg-primary text-white" : "bg-light")" style="width: 30px;">
+                                                        @i
+                                                    </div>
+                                                }
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Przyciski pod spodem -->
+                                <div class="mt-3 text-end">
+                                    <a class="btn btn-primary me-2" href="/addSala">Zarezerwuj</a>
+                                    <a class="btn btn-warning me-2" href="/editSala">Edytuj</a>
+                                    <button class="btn btn-danger">Usuń Rezerwację</button>
+                                </div>
+
+                            </td>
+                        </tr>
                     }
-                    else if (item.Projektor == 2)
-                    {
-                        <p>HDMI</p>
-                    }
-                    else if (item.Projektor == 3)
-                    {
-                        <p>HDMI<br> VGA</p>
-                    }
-                    else if (item.Projektor == 4)
-                    {
-                        <p>USB</p>
-                    }
-                    else if (item.Projektor == 5)
-                    {
-                        <p>USB<br> VGA</p>
-                    }
-                    else if (item.Projektor == 6)
-                    {
-                        <p>USB<br> HDMI</p>
-                    }
-                    else if (item.Projektor == 7)
-                    {
-                        <p>USB HDMI VGA</p>
-                    }
-                    else
-                    {
-                        <p>Brak</p>
-                    }
-                </td>
-                <td>
-                    @if (item.Tablica == 1)
-                    {
-                        <p>Multimedialna</p>
-                    }
-                    else if (item.Tablica == 2)
-                    {
-                        <p>Suchoscierna</p>
-                    }
-                    else if (item.Tablica == 3)
-                    {
-                        <p>Multimedialna Suchościeralna</p>
-                    }
-                    else if (item.Tablica == 4)
-                    {
-                        <p>Interaktywna</p>
-                    }
-                    else if (item.Tablica == 5)
-                    {
-                        <p>Interaktywna Multimedialna</p>
-                    }
-                    else if (item.Tablica == 6)
-                    {
-                        <p>Interaktywna Suchościeralna</p>
-                    }
-                    else if (item.Tablica == 7)
-                    {
-                        <p>Interaktywna Multimedialna Suchościeralna</p>
-                    }
-                    else
-                    {
-                        <p>Brak</p>
-                    }
-                </td>
-                <td>
-                    @if (item.Klimatyzacja == 1)
-                    {
-                        <p>Tak</p>
-                    }
-                    else
-                    {
-                        <p>Nie</p>
-                    }
-                </td>
-                <td>
-                    @if (item.Komputerowa == 1)
-                    {
-                        <p>Tak</p>
-                    }
-                    else
-                    {
-                        <p>Nie</p>
-                    }
-                </td>
-                <td>@item.Ulica</td>
-                <td>
-                    @if(item.Niepelnosprawni == 1)
-                    {
-                        <p>Tak</p>
-                    }
-                    else
-                    {
-                        <p>Nie</p>
-                    }
-                </td>
-                <td>@item.Dostepnosc</td>
-                <td>
-                    <a class="btn btn-primary mb-2" href='/addSala' role="button">Zarezerwuj</a>
-                    <a class="btn btn-warning mb-2" href='/editSala' role="button">Edytuj</a>
-                    <button class="btn btn-danger">Usuń Rezerwacje</button>
-                </td>
-            </tr>
-            lp++;
-        }
-    }
+
+
+                    lp++; // na końcu pętli, po wykorzystaniu lp
+                }
+            }
+    
     
     </tbody>
 </table>
@@ -283,6 +237,48 @@
         filter = new SaleFilter();
         await ApplyFilters();
     }
+
+    private HashSet<int> expandedRows = new();
+    private void ToggleDetails(int rowId)
+    {
+        if (expandedRows.Contains(rowId))
+            expandedRows.Remove(rowId);
+        else
+            expandedRows.Add(rowId);
+    }
+
+        private string ProjektorText(int id)
+        {
+            return id switch
+            {
+                1 => "VGA",
+                2 => "HDMI",
+                3 => "HDMI, VGA",
+                4 => "USB",
+                5 => "USB, VGA",
+                6 => "USB, HDMI",
+                7 => "USB, HDMI, VGA",
+                _ => "Brak"
+            };
+        }
+
+        private string TablicaText(int id)
+        {
+            return id switch
+            {
+                1 => "Multimedialna",
+                2 => "Suchościerna",
+                3 => "Multimedialna, Suchościerna",
+                4 => "Interaktywna",
+                5 => "Interaktywna, Multimedialna",
+                6 => "Interaktywna, Suchościerna",
+                7 => "Interaktywna, Multimedialna, Suchościerna",
+                _ => "Brak"
+            };
+        }
+
+
+
     /*
     Proejktor:
     0- Brak

@@ -1,4 +1,4 @@
-﻿@page "/addSala"
+@page "/addSala"
 @inject ReservationApiClient Api
 @inject NavigationManager Navigation
 
@@ -34,6 +34,11 @@
         <div class="mb-3">
             <label class="form-label">Godzina do (np. 10:00)</label>
             <InputText class="form-control" @bind-Value="godzinaDoTekst" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nazwa Przedmiotu</label>
+            <input type="text" class="form-control">
         </div>
 
         <div class="mb-3">
