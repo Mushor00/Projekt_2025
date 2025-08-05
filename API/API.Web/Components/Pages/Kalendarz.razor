@@ -1,0 +1,117 @@
+﻿@page "/Kalendarz"
+@inject ISaleApiClient SaleApi
+@inject ReservationApiClient ReservationApi
+@using API.ApiService.Models
+
+<h3>Kalendarz zajętości sal</h3>
+
+<select @bind="selectedSalaId" class="form-select mb-3">
+    <option value="">-- Wybierz salę --</option>
+    @foreach (var sala in sale)
+    {
+        <option value="@sala.Id">@sala.Nazwa (@sala.Budynek)</option>
+    }
+</select>
+
+@if (selectedSalaId != null)
+{
+    <button class="btn btn-primary mb-3" @onclick="PrevMonth">« Poprzedni</button>
+    <button class="btn btn-primary mb-3 ms-2" @onclick="NextMonth">Następny »</button>
+
+    <h5>@currentMonth.ToString("MMMM yyyy")</h5>
+
+    <div class="calendar-grid">
+        @foreach (var day in days)
+        {
+            <div class="calendar-cell @(day.Date.Month != currentMonth.Month ? "dimmed" : "")">
+                <div><strong>@day.Date.Day</strong></div>
+                @foreach (var rez in day.Rezerwacje)
+                {
+                    <div class="rez-block">
+                        @rez.Godzina_rozpoczecia:hh\\:mm - @rez.Godzina_zakonczenia:hh\\:mm
+                    </div>
+                }
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p>Wybierz salę, aby zobaczyć kalendarz.</p>
+}
+
+@code {
+    private List<Sala> sale = new();
+    private int? selectedSalaId;
+    private DateTime currentMonth = DateTime.Today;
+    private List<DzienRezerwacji> days = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var s = await SaleApi.GetMappedSaleAsync(); // <-- używamy nowej metody
+        if (s != null)
+        {
+            sale = s;
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (selectedSalaId != null)
+        {
+            await LoadCalendar();
+        }
+    }
+
+    private async Task LoadCalendar()
+    {
+        days.Clear();
+
+        var firstOfMonth = new DateTime(currentMonth.Year, currentMonth.Month, 1);
+        var start = firstOfMonth.AddDays(-(int)firstOfMonth.DayOfWeek);
+        var end = start.AddDays(41);
+
+        var dtoList = await ReservationApi.GetRezerwacjeBySalaAndDateRange(selectedSalaId.Value, start, end);
+
+        var rezerwacje = dtoList.Select(dto => new Rezerwacja
+        {
+            Data = dto.Data,
+            Godzina_rozpoczecia = dto.GodzinaRozpoczecia,
+            Godzina_zakonczenia = dto.GodzinaZakonczenia
+            // Id, Id_sale, Id_osoby zostają domyślne
+        }).ToList();
+
+        for (int i = 0; i < 42; i++)
+        {
+            var date = start.AddDays(i);
+            var rezerwacjeNaDzien = rezerwacje
+                .Where(r => r.Data.Date == date.Date)
+                .OrderBy(r => r.Godzina_rozpoczecia)
+                .ToList();
+
+            days.Add(new DzienRezerwacji
+            {
+                Date = date,
+                Rezerwacje = rezerwacjeNaDzien
+            });
+        }
+    }
+
+    private async Task PrevMonth()
+    {
+        currentMonth = currentMonth.AddMonths(-1);
+        await LoadCalendar();
+    }
+
+    private async Task NextMonth()
+    {
+        currentMonth = currentMonth.AddMonths(1);
+        await LoadCalendar();
+    }
+
+    class DzienRezerwacji
+    {
+        public DateTime Date { get; set; }
+        public List<Rezerwacja> Rezerwacje { get; set; } = new();
+    }
+}

@@ -23,3 +23,13 @@ public class Sala
     public int Pojemnosc { get; set; }
     public bool Dostepna { get; set; }
 }
+
+public class RezerwacjaDto
+{
+    public int Id { get; set; }
+    public int IdSali { get; set; }
+    public int IdOsoby { get; set; }
+    public DateTime Data { get; set; }
+    public TimeSpan GodzinaRozpoczecia { get; set; }
+    public TimeSpan GodzinaZakonczenia { get; set; }
+}
