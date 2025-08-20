@@ -1,6 +1,8 @@
 @page "/addSala"
-@inject ReservationApiClient Api
+@inject IReservationApiClient ReservationApi
+@inject ISaleApiClient SaleApi
 @inject NavigationManager Navigation
+@using API.ApiService.Models
 
 <PageTitle>Dodaj Rezerwację</PageTitle>
 
@@ -14,10 +16,14 @@
         <div class="mb-3">
             <label class="form-label">Wybierz salę</label>
             <InputSelect class="form-select" @bind-Value="rezerwacja.NumerSali">
-                <option disabled selected value="">-- wybierz --</option>
-                <option value="1">Sala 1</option>
-                <option value="2">Sala 2</option>
-                <option value="3">Sala 3</option>
+                <option value="0" selected disabled >-- wybierz --</option>
+                @if (sale != null)
+                {
+                    @foreach (var s in sale)
+                    {
+                        <option value="@s.Id">@s.Nazwa (@s.Budynek)</option>
+                    }
+                }
             </InputSelect>
         </div>
 
@@ -27,18 +33,18 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Godzina od (np. 09:00)</label>
-            <InputText class="form-control" @bind-Value="godzinaOdTekst" />
+            <label class="form-label" >Godzina rozpoczęcia</label>
+            <input class="form-control" type="time" data-val="true" data-val-required="Godzina rozpoczęcia jest wymagana" id="godzinaOd" name="godzinaOd" value="@godzinaOd" />
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Godzina do (np. 10:00)</label>
-            <InputText class="form-control" @bind-Value="godzinaDoTekst" />
+            <label class="form-label" >Godzina zakończenia</label>
+            <input class="form-control" type="time" data-val="true" data-val-required="Godzina zakończenia jest wymagana" id="godzinaDo" name="godzinaDo" value="@godzinaDo" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Nazwa Przedmiotu</label>
-            <input type="text" class="form-control">
+            <InputText class="form-control" @bind-Value="nazwaPrzedmiotu" />
         </div>
 
         <div class="mb-3">
@@ -53,7 +59,7 @@
 
         @if (!string.IsNullOrEmpty(wiadomosc))
         {
-            <div class="alert alert-info mt-3">@wiadomosc</div>
+            <div class="alert @(czyBlad ? "alert-danger" : "alert-success") mt-3">@wiadomosc</div>
         }
     </div>
 </EditForm>
@@ -61,28 +67,69 @@
 @code {
     private RezerwacjaRequest rezerwacja = new();
     private string wiadomosc = "";
+    private bool czyBlad = false;
+    private string nazwaPrzedmiotu = "";
+    private DateOnly dataDzien = DateOnly.FromDateTime(DateTime.Now);
+    private TimeOnly godzinaOd = new TimeOnly(9, 0);
+    private TimeOnly godzinaDo = new TimeOnly(10, 0);
 
-    private DateTime dataDzien = DateTime.Today;
-    private string godzinaOdTekst = "09:00";
-    private string godzinaDoTekst = "10:00";
+    private List<Sala>? sale;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            sale = await SaleApi.GetMappedSaleAsync();
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd ładowania sal: {ex.Message}";
+            czyBlad = true;
+        }
+    }
 
     private async Task ZarezerwujSale()
     {
-        // Próba sparsowania godzin
-        if (TimeSpan.TryParse(godzinaOdTekst, out var godzOd) &&
-            TimeSpan.TryParse(godzinaDoTekst, out var godzDo))
+        try
         {
-            rezerwacja.DataOd = dataDzien.Date + godzOd;
-            rezerwacja.DataDo = dataDzien.Date + godzDo;
+            czyBlad = false;
+            
+            if (rezerwacja.NumerSali == 0)
+            {
+                wiadomosc = "Wybierz salę.";
+                czyBlad = true;
+                return;
+            }
 
-            var sukces = await Api.ZarezerwujSaleAsync(rezerwacja);
-            wiadomosc = sukces
-                ? "Rezerwacja zakończona sukcesem"
-                : "Rezerwacja nie powiodła się — możliwy konflikt";
+            if (string.IsNullOrWhiteSpace(rezerwacja.Login))
+            {
+                wiadomosc = "Podaj login rezerwującego.";
+                czyBlad = true;
+                return;
+            }
+
+            if (godzinaDo <= godzinaOd)
+            {
+                wiadomosc = "Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.";
+                czyBlad = true;
+                return;
+            }
+
+            rezerwacja.Data = dataDzien;
+            rezerwacja.DataOd = godzinaOd;
+            rezerwacja.DataDo = godzinaDo;
+
+              //  var sukces = await ReservationApi.ZarezerwujSaleAsync(rezerwacja);
+
+                @* wiadomosc = sukces
+                    ? "Rezerwacja zakończona sukcesem"
+                    : "Rezerwacja nie powiodła się — możliwy konflikt";
+                czyBlad = !sukces; *@
         }
-        else
+        catch (Exception ex)
         {
-            wiadomosc = "Niepoprawny format godziny. Użyj np. 09:00.";
+            wiadomosc = $"Wystąpił błąd: {ex.Message}";
+            czyBlad = true;
         }
     }
 }

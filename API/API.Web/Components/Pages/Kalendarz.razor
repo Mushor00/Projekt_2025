@@ -18,7 +18,7 @@
     <button class="btn btn-primary mb-3" @onclick="PrevMonth">« Poprzedni</button>
     <button class="btn btn-primary mb-3 ms-2" @onclick="NextMonth">Następny »</button>
 
-    <h5>@currentMonth.ToString("MMMM yyyy")</h5>
+    <h5>@currentMonth.ToString("MM yyyy")</h5>
 
     <div class="calendar-grid">
         @foreach (var day in days)
@@ -43,7 +43,7 @@ else
 @code {
     private List<Sala> sale = new();
     private int? selectedSalaId;
-    private DateTime currentMonth = DateTime.Today;
+    private DateOnly currentMonth = DateOnly.FromDateTime(DateTime.Now);
     private List<DzienRezerwacji> days = new();
 
     protected override async Task OnInitializedAsync()
@@ -67,7 +67,7 @@ else
     {
         days.Clear();
 
-        var firstOfMonth = new DateTime(currentMonth.Year, currentMonth.Month, 1);
+        var firstOfMonth = new DateOnly(currentMonth.Year, currentMonth.Month, 1);
         var start = firstOfMonth.AddDays(-(int)firstOfMonth.DayOfWeek);
         var end = start.AddDays(41);
 
@@ -85,7 +85,7 @@ else
         {
             var date = start.AddDays(i);
             var rezerwacjeNaDzien = rezerwacje
-                .Where(r => r.Data.Date == date.Date)
+                .Where(r => r.Data == date)
                 .OrderBy(r => r.Godzina_rozpoczecia)
                 .ToList();
 
@@ -111,7 +111,7 @@ else
 
     class DzienRezerwacji
     {
-        public DateTime Date { get; set; }
+        public DateOnly Date { get; set; }
         public List<Rezerwacja> Rezerwacje { get; set; } = new();
     }
 }

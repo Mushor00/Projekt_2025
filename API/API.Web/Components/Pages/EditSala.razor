@@ -1,5 +1,7 @@
 @page "/editSala"
-@inject HttpClient Http
+@inject ISaleApiClient SaleApiClient
+@inject NavigationManager Navigation
+@using API.ApiService.Models
 
 <h3>Edycja sal</h3>
 
@@ -7,86 +9,136 @@
 {
     <p><em>Ładowanie sal...</em></p>
 }
+else if (sale.Count == 0)
+{
+    <p><em>Brak sal do wyświetlenia.</em></p>
+}
 else
 {
-    <EditForm Model="selectedSala" OnValidSubmit="ZapiszSale">
-        <DataAnnotationsValidator />
-        <ValidationSummary />
+    <div class="mb-3">
+        <label>Wybierz salę</label>
+        <select class="form-select" @onchange="OnSalaChanged">
+            <option value="">-- wybierz --</option>
+            @foreach (var s in sale)
+            {
+                <option value="@s.Id">@s.Nazwa (@s.Budynek)</option>
+            }
+        </select>
+    </div>
 
-        <div class="mb-3">
-            <label>Wybierz salę</label>
-            <select class="form-select" @onchange="OnSalaChanged">
-                <option value="">-- wybierz --</option>
-                @foreach (var s in sale)
-                {
-                    <option value="@s.Id">@s.Nazwa</option>
-                }
-            </select>
-        </div>
+    @if (selectedSala != null)
+    {
+        <EditForm Model="selectedSala" OnValidSubmit="ZapiszSale">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
 
-        @if (selectedSala != null)
-        {
             <div class="mb-3">
-                <label>Numer</label>
+                <label class="form-label">Numer</label>
                 <InputNumber class="form-control" @bind-Value="selectedSala.Numer" />
             </div>
-        <div class="mb-3">
-            <label class="form-label">Data</label>
-            <input type="date" class="form-control">
-        </div>
 
-        <div class="mb-3">
-            <label class="form-label">Godzina od</label>
-            <input type="time" class="form-control">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Budynek</label>
+                <InputText class="form-control" @bind-Value="selectedSala.Budynek" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Godzina do</label>
-            <input type="time" class="form-control">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Nazwa</label>
+                <InputText class="form-control" @bind-Value="selectedSala.Nazwa" />
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">Rezerwujący</label>
-            <input type="text" class="form-control">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">Pietro</label>
+                <InputNumber class="form-control" @bind-Value="selectedSala.Pietro" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Pojemność</label>
+                <InputNumber class="form-control" @bind-Value="selectedSala.Pojemnosc" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Dostępna</label>
+                <InputCheckbox class="form-check-input" @bind-Value="selectedSala.Dostepna" />
+            </div>
 
             <button type="submit" class="btn btn-primary">Zapisz</button>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(wiadomosc))
+        {
+            <div class="alert @(czyBlad ? "alert-danger" : "alert-success") mt-3">@wiadomosc</div>
         }
-    </EditForm>
+    }
 }
 
 @code {
-    private List<Sala> sale;
-    private Sala selectedSala;
+    private List<Sala>? sale;
+    private Sala? selectedSala;
+    private string wiadomosc = "";
+    private bool czyBlad = false;
 
     protected override async Task OnInitializedAsync()
     {
-        sale = await Http.GetFromJsonAsync<List<Sala>>("/api/sale");
+        try
+        {
+            sale = await SaleApiClient.GetMappedSaleAsync();
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd ładowania sal: {ex.Message}";
+            czyBlad = true;
+        }
     }
 
     private void OnSalaChanged(ChangeEventArgs e)
     {
-        var id = int.Parse(e.Value.ToString());
-        selectedSala = sale.FirstOrDefault(s => s.Id == id);
+        try
+        {
+            if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
+            {
+                selectedSala = sale?.FirstOrDefault(s => s.Id == id);
+            }
+            else
+            {
+                selectedSala = null;
+            }
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd wyboru sali: {ex.Message}";
+            czyBlad = true;
+        }
     }
 
     private async Task ZapiszSale()
     {
-        var response = await Http.PutAsJsonAsync($"/api/sale/{selectedSala.Id}", selectedSala);
-        if (response.IsSuccessStatusCode)
+        try
         {
-            await OnInitializedAsync();
-        }
-    }
+            if (selectedSala == null)
+            {
+                wiadomosc = "Nie wybrano sali do edycji.";
+                czyBlad = true;
+                return;
+            }
 
-    public class Sala
-    {
-        public int Id { get; set; }
-        public int Numer { get; set; }
-        public string Budynek { get; set; }
-        public string Nazwa { get; set; }
-        public int Pietro { get; set; }
-        public int Pojemnosc { get; set; }
-        public bool Dostepna { get; set; }
+            var sukces = await SaleApiClient.UpdateSalaAsync(selectedSala);
+            
+            if (sukces)
+            {
+                wiadomosc = "Sala została zapisana pomyślnie.";
+                czyBlad = false;
+            }
+            else
+            {
+                wiadomosc = "Nie udało się zapisać sali.";
+                czyBlad = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd zapisu sali: {ex.Message}";
+            czyBlad = true;
+        }
     }
 }

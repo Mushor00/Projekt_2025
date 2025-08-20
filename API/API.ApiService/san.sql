@@ -73,7 +73,7 @@ INSERT INTO `sale` (`ID`, `Numer`, `Budynek`, `Nazwa`, `Piętro`, `Pojemność`,
 (1, 1, 'K', 'K21', 2, 15, 'wolna', 5, 2, 1, 1, 'Kilińskiego', 1),
 (2, 2, 'K', 'K22', 2, 15, 'wolna', 4, 1, 1, 1, 'Kilińskiego', 1),
 (3, 3, 'K', 'K23', 2, 15, 'wolna', 1, 2, 1, 1, 'Kilińskiego', 1),
-(4, 1, 'K', 'K31', 3, 15, 'zajęta', 5, 3, 1, 1, 'Kilińskiego', 1),
+(4, 1, 'K', 'K31', 3, 15, 'wolna', 5, 3, 1, 1, 'Kilińskiego', 1),
 (5, 2, 'K', 'K32', 3, 15, 'w konserwacji', 2, 2, 1, 1, 'Kilińskiego', 1),
 (6, 3, 'K', 'K33', 3, 15, 'wolna', 4, 1, 1, 1, 'Kilińskiego', 1),
 (7, 1, 'K', 'K41', 4, 15, 'wolna', 2, 4, 1, 1, 'Kilińskiego', 1),
@@ -105,6 +105,7 @@ CREATE TABLE `sale_dostepnosc` (
   `ID` int(11) NOT NULL,
   `ID_sale` int(11) NOT NULL,
   `ID_osoby` int(11) NOT NULL,
+  `Nazwa_przedmiotu` char(255) NOT NULL,
   `Data` date NOT NULL,
   `Godzina_rozpoczecia` time NOT NULL,
   `Godzina_zakonczenia` time NOT NULL
@@ -142,7 +143,7 @@ ALTER TABLE `sale_dostepnosc`
 -- AUTO_INCREMENT for table `osoby`
 --
 ALTER TABLE `osoby`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
 
 --
 -- AUTO_INCREMENT for table `sale`

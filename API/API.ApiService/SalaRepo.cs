@@ -42,10 +42,24 @@ namespace API.ApiService
         {
             await using var conn = await _dataSource.OpenConnectionAsync();
             await using var cmd = conn.CreateCommand();
-            cmd.CommandText = @"
-            UPDATE sale
-            SET numer = @numer, budynek = @budynek, nazwa = @nazwa, pietro = @pietro, pojemnosc = @pojemnosc, dostepna = @dostepna
-            WHERE id = @id";
+            cmd.CommandText = @"UPDATE sale SET numer = @numer, budynek = @budynek, nazwa = @nazwa, pietro = @pietro, pojemnosc = @pojemnosc, dostepna = @dostepna WHERE id = @id";
+
+            cmd.Parameters.AddWithValue("@numer", sala.Numer);
+            cmd.Parameters.AddWithValue("@budynek", sala.Budynek);
+            cmd.Parameters.AddWithValue("@nazwa", sala.Nazwa);
+            cmd.Parameters.AddWithValue("@pietro", sala.Pietro);
+            cmd.Parameters.AddWithValue("@pojemnosc", sala.Pojemnosc);
+            cmd.Parameters.AddWithValue("@dostepna", sala.Dostepna);
+            cmd.Parameters.AddWithValue("@id", sala.Id);
+
+            return await cmd.ExecuteNonQueryAsync() > 0;
+        }
+
+        public async Task<bool> UpdateSalaAsync(Sala sala)
+        {
+            await using var conn = await _dataSource.OpenConnectionAsync();
+            await using var cmd = conn.CreateCommand();
+            cmd.CommandText = @"UPDATE sale SET numer = @numer, budynek = @budynek, nazwa = @nazwa, pietro = @pietro, pojemnosc = @pojemnosc, dostepna = @dostepna WHERE id = @id";
 
             cmd.Parameters.AddWithValue("@numer", sala.Numer);
             cmd.Parameters.AddWithValue("@budynek", sala.Budynek);

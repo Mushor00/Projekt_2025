@@ -7,6 +7,11 @@
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
   </PropertyGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\API.ApiService\API.ApiService.csproj" />
+    <ProjectReference Include="..\API.Web\API.Web.csproj" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Aspire.Hosting.Testing" Version="9.0.0" />

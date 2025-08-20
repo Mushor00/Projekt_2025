@@ -14,6 +14,10 @@ namespace API.ApiService
 
         public Task<List<Sala>> PobierzSaleAsync() => _repo.PobierzSaleAsync();
         public Task<bool> ZapiszSaleAsync(Sala sala) => _repo.ZapiszSaleAsync(sala);
+        public async Task<bool> UpdateSalaAsync(Sala sala)
+        {
+            return await _repo.UpdateSalaAsync(sala);
+        }
     }
 
 }

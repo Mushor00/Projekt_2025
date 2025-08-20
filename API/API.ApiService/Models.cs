@@ -4,14 +4,18 @@ public class RezerwacjaRequest
 {
     public int NumerSali { get; set; }
     public string Login { get; set; } = string.Empty;
-    public DateTime DataOd { get; set; }
-    public DateTime DataDo { get; set; }
+    public string NazwaPrzedmiotu { get; set; } = string.Empty;
+    public DateOnly Data { get; set; }
+    public TimeOnly DataOd { get; set; }
+    public TimeOnly DataDo { get; set; }
 }
 
 public class EdytujRezerwacjeRequest
 {
-    public DateTime NowaDataOd { get; set; }
-    public DateTime NowaDataDo { get; set; }
+    public string NazwaPrzedmiotu { get; set; } = string.Empty;
+    public DateOnly Data { get; set; }
+    public TimeOnly NowaGodzinaOd { get; set; }
+    public TimeOnly NowaGodzinaDo { get; set; }
 }
 public class Sala
 {
@@ -29,7 +33,7 @@ public class RezerwacjaDto
     public int Id { get; set; }
     public int IdSali { get; set; }
     public int IdOsoby { get; set; }
-    public DateTime Data { get; set; }
-    public TimeSpan GodzinaRozpoczecia { get; set; }
-    public TimeSpan GodzinaZakonczenia { get; set; }
+    public DateOnly Data { get; set; }
+    public TimeOnly GodzinaRozpoczecia { get; set; }
+    public TimeOnly GodzinaZakonczenia { get; set; }
 }

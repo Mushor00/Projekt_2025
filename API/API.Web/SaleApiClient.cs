@@ -13,6 +13,7 @@ public interface ISaleApiClient
 {
     Task<List<Sale>?> IGetSaleAsync(); // STARY BACKEND – oryginalne Sale z DB
     Task<List<Sala>?> GetMappedSaleAsync(); // NOWY FRONTEND – zmapowane na Sala
+    Task<bool> UpdateSalaAsync(Sala sala);
     Task<List<Sale>?> GetFilteredSales([FromBody] SaleFilter filter); // bez zmian
 }
 
@@ -20,9 +21,12 @@ public class SaleApiClient : ISaleApiClient
 {
     private readonly MySqlDataSource _dataSource;
 
-    public SaleApiClient(MySqlDataSource dataSource)
+    private readonly HttpClient _http;
+
+    public SaleApiClient(MySqlDataSource dataSource, HttpClient http)
     {
         _dataSource = dataSource;
+        _http = http;
     }
 
     // STARY BACKEND – zwraca oryginalne encje z bazy danych
@@ -40,7 +44,7 @@ public class SaleApiClient : ISaleApiClient
         }
     }
 
-    // NOWY FRONTEND – zwraca zmapowane obiekty typu Sala
+    //NOWY FRONTEND – zwraca zmapowane obiekty typu Sala
     public async Task<List<Sala>?> GetMappedSaleAsync()
     {
         try
@@ -50,7 +54,7 @@ public class SaleApiClient : ISaleApiClient
 
             return saleZBazy?.Select(s => new Sala
             {
-                Id = 0, // nie używane w jebanej bazie, więc ustawiamy na 0
+                Id = 0,
                 Numer = s.Numer,
                 Budynek = s.Budynek ?? "",
                 Nazwa = s.Nazwa ?? "",
@@ -63,6 +67,32 @@ public class SaleApiClient : ISaleApiClient
         {
             Console.WriteLine("Błąd połączenia z bazą: " + ex.Message);
             return null;
+        }
+    }
+
+    // public async Task<List<Sala>> GetMappedSaleAsync()
+    // {
+    //     try
+    //     {
+    //         var response = await _http.GetFromJsonAsync<List<Sala>>("/api/sale");
+    //         return response ?? new List<Sala>();
+    //     }
+    //     catch (Exception)
+    //     {
+    //         return new List<Sala>();
+    //     }
+    // }
+
+    public async Task<bool> UpdateSalaAsync(Sala sala)
+    {
+        try
+        {
+            var response = await _http.PutAsJsonAsync($"/api/sale/{sala.Id}", sala);
+            return response.IsSuccessStatusCode;
+        }
+        catch (Exception)
+        {
+            return false;
         }
     }
 

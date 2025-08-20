@@ -15,9 +15,9 @@ namespace API.ApiService
             _logger = logger;
         }
 
-        public async Task<bool> ZarezerwujSaleAsync(int numerSali, string login, DateTime dataOd, DateTime dataDo)
+        public async Task<bool> ZarezerwujSaleAsync(int numerSali, string nazwaPrzedmiotu, string login, DateOnly dataOd, TimeOnly godzinaOd, TimeOnly godzinaDo)
         {
-            return await _repo.ZarezerwujSale(numerSali, login, dataOd, dataDo);
+            return await _repo.ZarezerwujSale(numerSali, nazwaPrzedmiotu, login, dataOd, godzinaOd, godzinaDo);
         }
 
         public async Task<bool> UsunRezerwacjeAsync(int idRezerwacji)
@@ -33,11 +33,11 @@ namespace API.ApiService
             }
         }
 
-        public async Task<bool> EdytujRezerwacjeAsync(int idRezerwacji, DateTime nowaDataOd, DateTime nowaDataDo)
+        public async Task<bool> EdytujRezerwacjeAsync(int idRezerwacji, DateOnly data, TimeOnly nowaGodzinaOd, TimeOnly nowaGodzinaDo)
         {
             try
             {
-                return await _repo.EdytujRezerwacjeAsync(idRezerwacji, nowaDataOd, nowaDataDo);
+                return await _repo.EdytujRezerwacjeAsync(idRezerwacji, data, nowaGodzinaOd, nowaGodzinaDo);
             }
             catch (Exception ex)
             {

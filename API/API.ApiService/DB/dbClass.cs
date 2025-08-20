@@ -29,6 +29,7 @@ namespace API.ApiService.DB
         public int Id { get; set; }
         public int ID_sala { get; set; }
         public int ID_osoby { get; set; }
+        public string? Nazwa_przedmiotu { get; set; }
         public DateOnly Data { get; set; }
         public TimeOnly GodzinaRozpoczecia { get; set; }
         public TimeOnly GodzinaZakonczenia { get; set; }

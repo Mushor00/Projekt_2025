@@ -18,15 +18,14 @@ public class ReservationApiClient : IReservationApiClient
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<List<Rezerwacja>> GetRezerwacjeBySalaAndMonth(int salaId, DateTime miesiac)
+    public async Task<List<Rezerwacja>> GetRezerwacjeBySalaAndMonth(int salaId, DateOnly miesiac)
     {
         string miesiacParam = miesiac.ToString("yyyy-MM");
-        var response = await _http.GetFromJsonAsync<List<Rezerwacja>>(
-            $"/api/rezerwacje/sala/{salaId}?miesiac={miesiacParam}");
+        var response = await _http.GetFromJsonAsync<List<Rezerwacja>>($"/api/rezerwacje/sala/{salaId}?miesiac={miesiacParam}");
 
         return response ?? new();
     }
-    public async Task<List<RezerwacjaDto>?> GetRezerwacjeBySalaAndDateRange(int numerSali, DateTime dataOd, DateTime dataDo)
+    public async Task<List<RezerwacjaDto>?> GetRezerwacjeBySalaAndDateRange(int numerSali, DateOnly dataOd, DateOnly dataDo)
     {
         var response = await _http.GetAsync($"/api/rezerwacje/sala/{numerSali}?dataOd={dataOd:O}&dataDo={dataDo:O}");
         if (response.IsSuccessStatusCode)
@@ -36,6 +35,10 @@ public class ReservationApiClient : IReservationApiClient
 
         return null;
     }
-
+    public async Task<List<Sala>?> GetSaleAsync()
+    {
+        var response = await _http.GetFromJsonAsync<List<Sala>>("/api/sale");
+        return response;
+    }
 
 }

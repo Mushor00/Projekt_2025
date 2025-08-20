@@ -62,7 +62,9 @@ rezerwacje.MapPost("/rezerwuj", async (
 {
     var sukces = await reservationService.ZarezerwujSaleAsync(
         request.NumerSali,
+        request.NazwaPrzedmiotu,
         request.Login,
+        request.Data,
         request.DataOd,
         request.DataDo
     );
@@ -87,7 +89,7 @@ rezerwacje.MapPut("/edytuj/{idRezerwacji}", async (
     [FromBody] EdytujRezerwacjeRequest request,
     ReservationService reservationService) =>
 {
-    var sukces = await reservationService.EdytujRezerwacjeAsync(idRezerwacji, request.NowaDataOd, request.NowaDataDo);
+    var sukces = await reservationService.EdytujRezerwacjeAsync(idRezerwacji, request.Data, request.NowaGodzinaOd, request.NowaGodzinaDo);
     return sukces
         ? Results.Ok(new { message = "Rezerwacja zaktualizowana." })
         : Results.Conflict(new { message = "Nie udało się zaktualizować rezerwacji." });
@@ -101,10 +103,12 @@ sale.MapGet("/", async (SalaService service) =>
     return Results.Ok(wynik);
 });
 
-sale.MapPut("/{id}", async (int id, [FromBody] Sala sala, SalaService service) =>
+app.MapPut("/{id}", async (int id, [FromBody] Sala sala, SalaService service) =>
 {
-    if (id != sala.Id) return Results.BadRequest();
-    var sukces = await service.ZapiszSaleAsync(sala);
+    if (id != sala.Id)
+        return Results.BadRequest("ID w URL nie pasuje do ID w obiekcie");
+
+    var sukces = await service.UpdateSalaAsync(sala);
     return sukces ? Results.Ok() : Results.NotFound();
 });
 

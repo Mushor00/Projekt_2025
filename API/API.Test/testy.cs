@@ -75,30 +75,58 @@ public class ReservationServiceTests
     public async Task EdytujRezerwacjeAsync_PoprawneDane_ZwracaTrue()
     {
         // Arrange
-        _repoMock.Setup(r => r.EdytujRezerwacjeAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
+        _repoMock.Setup(r => r.EdytujRezerwacjeAsync(
+            It.IsAny<int>(),
+            It.IsAny<DateOnly>(),
+            It.IsAny<TimeOnly>(),
+            It.IsAny<TimeOnly>()))
             .ReturnsAsync(true);
 
         // Act
-        bool result = await _service.EdytujRezerwacjeAsync(1, DateTime.Now, DateTime.Now.AddHours(1));
+        bool result = await _service.EdytujRezerwacjeAsync(
+            1,
+            DateOnly.FromDateTime(DateTime.Now),
+            TimeOnly.FromDateTime(DateTime.Now),
+            TimeOnly.FromDateTime(DateTime.Now.AddHours(1)));
 
         // Assert
         Assert.True(result);
-        _repoMock.Verify(r => r.EdytujRezerwacjeAsync(1, It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
-    }
-
-    [Fact]
-    public async Task EdytujRezerwacjeAsync_WystapilWyjatek_ZwracaFalseILogujeBlad()
-    {
-        // Arrange
-        var exception = new Exception("Błąd bazy");
-        _repoMock.Setup(r => r.EdytujRezerwacjeAsync(It.IsAny<int>(), It.IsAny<DateTime>(), It.IsAny<DateTime>())).ThrowsAsync(exception);
+        _repoMock.Setup(r => r.EdytujRezerwacjeAsync(
+            It.IsAny<int>(),
+            It.IsAny<DateOnly>(),
+            It.IsAny<TimeOnly>(),
+            It.IsAny<TimeOnly>())).ThrowsAsync(exception);
 
         // Act
-        bool result = await _service.EdytujRezerwacjeAsync(1, DateTime.Now, DateTime.Now.AddHours(1));
+        bool result = await _service.EdytujRezerwacjeAsync(
+            1,
+            DateOnly.FromDateTime(DateTime.Now),
+            TimeOnly.FromDateTime(DateTime.Now),
+            TimeOnly.FromDateTime(DateTime.Now.AddHours(1)));
 
         // Assert
         Assert.False(result);
-        _repoMock.Verify(r => r.EdytujRezerwacjeAsync(1, It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
+        _repoMock.Verify(r => r.EdytujRezerwacjeAsync(
+            1,
+            It.IsAny<DateOnly>(),
+            It.IsAny<TimeOnly>(),
+            It.IsAny<TimeOnly>()), Times.Once);
+        _loggerMock.Verify(
+            x => x.Log(
+                LogLevel.Error,
+                It.IsAny<EventId>(),
+                It.Is<It.IsAnyType>((v, t) => v.ToString().Contains("Błąd podczas edytowania rezerwacji.")),
+                exception,
+                It.IsAny<Func<It.IsAnyType, Exception, string>>()),
+            Times.Once);
+
+        // Assert
+        Assert.False(result);
+        _repoMock.Verify(r => r.EdytujRezerwacjeAsync(
+            1,
+            It.IsAny<DateOnly>(),
+            It.IsAny<TimeOnly>(),
+            It.IsAny<TimeOnly>()), Times.Once);
         _loggerMock.Verify(
             x => x.Log(
                 LogLevel.Error,

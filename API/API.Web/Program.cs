@@ -28,13 +28,9 @@ builder.Services.AddScoped<ReservationService>();
 
 // front
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(c =>
 
-// HTTP klienty, np.:
-builder.Services.AddHttpClient<ReservationApiClient>(client =>
-{
-    client.BaseAddress = new Uri("https://localhost:5001");
-}));
+
+builder.Services.AddScoped<IReservationApiClient, ReservationApiClient>();
 
 var app = builder.Build();
 if (app.Environment.IsDevelopment())
@@ -58,6 +54,8 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
+
+
 
 app.UseHttpsRedirection();
 app.UseStaticFiles(); // je�li nie masz, dodaj to

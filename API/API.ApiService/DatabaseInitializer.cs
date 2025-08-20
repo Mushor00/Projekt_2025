@@ -98,11 +98,11 @@ public class DatabaseInitializer
                 await command.ExecuteNonQueryAsync();
 
                 var preview = commandText.Trim().Replace("\n", " ").Replace("\r", "");
-                Console.WriteLine($"✅ Wykonano: {preview.Substring(0, Math.Min(80, preview.Length))}...");
+                Console.WriteLine($"Wykonano: {preview.Substring(0, Math.Min(80, preview.Length))}...");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Błąd wykonywania polecenia: {ex.Message}");
+                Console.WriteLine($"Błąd wykonywania polecenia: {ex.Message}");
                 Console.WriteLine($"Polecenie: {commandText.Substring(0, Math.Min(200, commandText.Length))}...");
             }
         }
