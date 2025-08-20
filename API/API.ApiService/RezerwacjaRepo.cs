@@ -4,7 +4,7 @@ namespace API.ApiService.DB;
 
 public class ReservationRepo(MySqlDataSource database)
 {
-    public async Task<bool> ZarezerwujSale(int numerSali, string login, string nazwaPrzedmiotu, DateOnly data, TimeOnly godzinaOd, TimeOnly godzinaDo)
+    public async Task<bool> ZarezerwujSale(int numerSali, string Imie, string nazwaPrzedmiotu, DateOnly data, TimeOnly godzinaOd, TimeOnly godzinaDo)
     {
         using var conn = await database.OpenConnectionAsync();
         using var cmd = conn.CreateCommand();
@@ -14,14 +14,18 @@ public class ReservationRepo(MySqlDataSource database)
         cmd.Parameters.AddWithValue("@godzinaOd", godzinaOd);
         cmd.Parameters.AddWithValue("@godzinaDo", godzinaDo);
 
+        var idSala = await GetIdSaliAsync(numerSali, conn);
+        if (idSala == 0) return false;
+
         var kolizje = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         if (kolizje > 0) return false;
 
-        cmd.CommandText = "INSERT INTO sale_dostepnosc (ID_sale, ID_osoby, Nazwa_przedmiotu, Data, Godzina_rozpoczecia, Godzina_zakonczenia) VALUES (@numerSali, @idOsoby, @data, @godzinaOd, @godzinaDo)";
+        cmd.CommandText = "INSERT INTO sale_dostepnosc (ID_sale, ID_osoby, Nazwa_przedmiotu, Data, Godzina_rozpoczecia, Godzina_zakonczenia) VALUES (@idSala, @idOsoby, @nazwaPrzedmiotu, @data, @godzinaOd, @godzinaDo)";
 
-        var idOsoby = await GetIdOsobyAsync(login, conn);
-
+        var idOsoby = await GetIdOsobyAsync(Imie, conn);
+        cmd.Parameters.AddWithValue("@idSala", idSala);
         cmd.Parameters.AddWithValue("@idOsoby", idOsoby);
+        cmd.Parameters.AddWithValue("@nazwaPrzedmiotu", nazwaPrzedmiotu);
         await cmd.ExecuteNonQueryAsync();
         return true;
     }
@@ -29,7 +33,7 @@ public class ReservationRepo(MySqlDataSource database)
     public async Task<int> GetIdOsobyAsync(string login, MySqlConnection conn)
     {
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT ID FROM osoby WHERE Login = @login";
+        cmd.CommandText = "SELECT ID FROM osoby WHERE Imie = @login";
         cmd.Parameters.AddWithValue("@login", login);
         var result = await cmd.ExecuteScalarAsync();
         return result != null ? Convert.ToInt32(result) : 0;
@@ -42,6 +46,15 @@ public class ReservationRepo(MySqlDataSource database)
         cmd.CommandText = "DELETE FROM sale_dostepnosc WHERE ID = @id";
         cmd.Parameters.AddWithValue("@id", id);
         return await cmd.ExecuteNonQueryAsync() > 0;
+    }
+
+    public async Task<int> GetIdSaliAsync(int numerSali, MySqlConnection conn)
+    {
+        using var cmd = conn.CreateCommand();
+        cmd.CommandText = "SELECT ID FROM sale WHERE Numer = @numerSali";
+        cmd.Parameters.AddWithValue("@numerSali", numerSali);
+        var result = await cmd.ExecuteScalarAsync();
+        return result != null ? Convert.ToInt32(result) : 0;
     }
 
     public async Task<bool> EdytujRezerwacjeAsync(int id, DateOnly date, TimeOnly nowaOd, TimeOnly nowaDo)

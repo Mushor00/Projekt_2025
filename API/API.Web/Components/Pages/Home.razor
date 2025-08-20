@@ -2,7 +2,6 @@
 @using API.ApiService.DB
 @using API.ApiService.Filters
 @using Microsoft.VisualBasic
-@using System.ComponentModel.DataAnnotations.Schema
 @inject ISaleApiClient SaleApiClient
 @rendermode InteractiveServer
 
@@ -161,7 +160,7 @@
                                     <!-- Środkowa kolumna -->
                                     <div class="col-md-4">
                                         <div><strong>Rezerwacja:</strong></div>
-                                        <div><strong>Data:</strong> @currentDate.ToString("dd-MM-yyyy")</div>
+                                        <div><strong>Data:</strong> @currentDate.ToString("yyyy-MM-dd")</div>
                                         <div><strong>Od godz.:</strong> 10:00</div>
                                         <div><strong>Do godz.:</strong> 12:00</div>
                                         <div><strong>Nazwa Przedmiotu:</strong> Inzynieria Oprogramowania</div>
@@ -171,7 +170,7 @@
                                     <!-- Kalendarz -->
                                     <div class="col-md-3">
                                         <div class="calendar border p-2 rounded text-center">
-                                            <div><strong>@currentDate.ToString("yyyy")</strong></div>
+                                            <div><strong>@currentDate.ToString("MM yyyy")</strong></div>
                                             <div class="d-flex flex-wrap justify-content-center">
                                                 @for (int i = 1; i <= 31; i++)
                                                 {
@@ -210,15 +209,8 @@
     public DateOnly currentDate = DateOnly.FromDateTime(DateTime.Now);
     private SaleFilter filter = new();
 
-    
     protected override async Task OnInitializedAsync()
     {
-        var newTable = new DateOnly[12];
-
-        for (int i = 0; i < 12; i++)
-        {
-            newTable[i] = newTable[i - 1].AddMonths(1);
-        }
         try
         {
             sales = await SaleApiClient.IGetSaleAsync();

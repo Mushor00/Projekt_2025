@@ -8,7 +8,7 @@
 
 <h1 class="text-center">Dodaj Rezerwację</h1>
 
-<EditForm Model="rezerwacja" OnValidSubmit="ZarezerwujSale">
+<EditForm Model="rezerwacja" OnValidSubmit="ZarezerwujSale" @formname="rezerwacjaForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
@@ -29,27 +29,27 @@
 
         <div class="mb-3">
             <label class="form-label">Data</label>
-            <InputDate class="form-control" @bind-Value="dataDzien" />
+            <InputDate class="form-control" @bind-Value="rezerwacja.Data" />
         </div>
 
         <div class="mb-3">
             <label class="form-label" >Godzina rozpoczęcia</label>
-            <input class="form-control" type="time" data-val="true" data-val-required="Godzina rozpoczęcia jest wymagana" id="godzinaOd" name="godzinaOd" value="@godzinaOd" />
+            <InputDate class="form-control" type="InputDateType.Time" data-val="true" data-val-required="Godzina rozpoczęcia jest wymagana" id="godzinaOd" name="godzinaOd" @bind-value="rezerwacja.DataOd" />
         </div>
 
         <div class="mb-3">
             <label class="form-label" >Godzina zakończenia</label>
-            <input class="form-control" type="time" data-val="true" data-val-required="Godzina zakończenia jest wymagana" id="godzinaDo" name="godzinaDo" value="@godzinaDo" />
+            <InputDate class="form-control" type="InputDateType.Time" data-val="true" data-val-required="Godzina zakończenia jest wymagana" id="godzinaDo" name="godzinaDo" @bind-value="rezerwacja.DataDo" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Nazwa Przedmiotu</label>
-            <InputText class="form-control" @bind-Value="nazwaPrzedmiotu" />
+            <InputText class="form-control" @bind-value="rezerwacja.NazwaPrzedmiotu" />
         </div>
 
         <div class="mb-3">
             <label class="form-label">Rezerwujący</label>
-            <InputText class="form-control" @bind-Value="rezerwacja.Login" />
+            <InputText class="form-control" @bind-value="rezerwacja.Imie" />
         </div>
 
         <div class="d-flex justify-content-between">
@@ -66,17 +66,18 @@
 
 @code {
     private RezerwacjaRequest rezerwacja = new();
+
     private string wiadomosc = "";
     private bool czyBlad = false;
-    private string nazwaPrzedmiotu = "";
-    private DateOnly dataDzien = DateOnly.FromDateTime(DateTime.Now);
-    private TimeOnly godzinaOd = new TimeOnly(9, 0);
-    private TimeOnly godzinaDo = new TimeOnly(10, 0);
-
+    
+    
     private List<Sala>? sale;
 
     protected override async Task OnInitializedAsync()
     {
+        rezerwacja.Data = DateOnly.FromDateTime(DateTime.Now);
+        rezerwacja.DataOd = new TimeOnly(9, 0);
+        rezerwacja.DataDo = new TimeOnly(10, 0);
         try
         {
             sale = await SaleApi.GetMappedSaleAsync();
@@ -101,30 +102,30 @@
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(rezerwacja.Login))
+            if (string.IsNullOrWhiteSpace(rezerwacja.Imie))
             {
-                wiadomosc = "Podaj login rezerwującego.";
+                wiadomosc = "Podaj Imie rezerwującego.";
                 czyBlad = true;
                 return;
             }
 
-            if (godzinaDo <= godzinaOd)
+            if (rezerwacja.DataDo <= rezerwacja.DataOd)
             {
                 wiadomosc = "Godzina zakończenia musi być późniejsza niż godzina rozpoczęcia.";
                 czyBlad = true;
                 return;
             }
+            rezerwacja.Imie = rezerwacja.Imie.Split(' ')[0]; // Pobieramy tylko pierwsze imię
+            rezerwacja.Data = rezerwacja.Data;
+            rezerwacja.DataOd = rezerwacja.DataOd;
+            rezerwacja.DataDo = rezerwacja.DataDo;
 
-            rezerwacja.Data = dataDzien;
-            rezerwacja.DataOd = godzinaOd;
-            rezerwacja.DataDo = godzinaDo;
+               var sukces = await ReservationApi.ZarezerwujSaleAsync(rezerwacja);
 
-              //  var sukces = await ReservationApi.ZarezerwujSaleAsync(rezerwacja);
-
-                @* wiadomosc = sukces
+                wiadomosc = sukces
                     ? "Rezerwacja zakończona sukcesem"
                     : "Rezerwacja nie powiodła się — możliwy konflikt";
-                czyBlad = !sukces; *@
+                czyBlad = !sukces;
         }
         catch (Exception ex)
         {
