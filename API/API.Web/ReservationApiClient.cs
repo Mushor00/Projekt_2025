@@ -15,12 +15,13 @@ public class ReservationApiClient : IReservationApiClient
         _dataSource = dataSource;
     }
 
-    public async Task<bool> ZarezerwujSaleAsync(RezerwacjaRequest request)
+    public async Task<(bool Success, string Message)> ZarezerwujSaleAsync(RezerwacjaRequest request)
     {
         var repo = new ReservationRepo(_dataSource);
         var result = await repo.ZarezerwujSale(
-            request.NumerSali,
+            request.IdSali,
             request.Imie,
+            request.Nazwisko,
             request.NazwaPrzedmiotu,
             request.Data,
             request.DataOd,
@@ -32,17 +33,80 @@ public class ReservationApiClient : IReservationApiClient
 
     public async Task<List<Rezerwacja>> GetRezerwacjeBySalaAndMonth(int salaId, DateOnly miesiac)
     {
-        return null;
+        // Ta metoda nie jest używana, zwracamy pustą listę
+        return new List<Rezerwacja>();
     }
-    public async Task<List<RezerwacjaDto>?> GetRezerwacjeBySalaAndDateRange(int numerSali, DateOnly dataOd, DateOnly dataDo)
+    public async Task<List<RezerwacjaDto>?> GetRezerwacjeBySalaAndDateRange(int idSali, DateOnly dataOd, DateOnly dataDo)
     {
+        try
+        {
+            using var conn = await _dataSource.OpenConnectionAsync();
+            using var cmd = conn.CreateCommand();
 
+            // Używamy bezpośrednio ID sali
+            cmd.CommandText = @"SELECT sd.ID, sd.ID_sale as IdSali, sd.ID_osoby as IdOsoby, 
+                                       sd.Data, sd.Godzina_rozpoczecia as GodzinaRozpoczecia, 
+                                       sd.Godzina_zakonczenia as GodzinaZakonczenia 
+                                FROM sale_dostepnosc sd 
+                                WHERE sd.ID_sale = @idSali AND sd.Data BETWEEN @dataOd AND @dataDo";
+            cmd.Parameters.AddWithValue("@idSali", idSali);
+            cmd.Parameters.AddWithValue("@dataOd", dataOd);
+            cmd.Parameters.AddWithValue("@dataDo", dataDo);
 
-        return null;
+            var rezerwacje = new List<RezerwacjaDto>();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                rezerwacje.Add(new RezerwacjaDto
+                {
+                    Id = reader.GetInt32("ID"),
+                    IdSali = reader.GetInt32("IdSali"),
+                    IdOsoby = reader.GetInt32("IdOsoby"),
+                    Data = DateOnly.FromDateTime(reader.GetDateTime("Data")),
+                    GodzinaRozpoczecia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("GodzinaRozpoczecia")),
+                    GodzinaZakonczenia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("GodzinaZakonczenia"))
+                });
+            }
+
+            return rezerwacje;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania rezerwacji: {ex.Message}");
+            return new List<RezerwacjaDto>();
+        }
     }
     public async Task<List<Sala>?> GetSaleAsync()
     {
-        return null;
+        try
+        {
+            using var conn = await _dataSource.OpenConnectionAsync();
+            using var cmd = conn.CreateCommand();
+            cmd.CommandText = "SELECT * FROM sale";
+
+            var sale = new List<Sala>();
+            using var reader = await cmd.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                sale.Add(new Sala
+                {
+                    Id = reader.GetInt32("ID"),
+                    Numer = reader.GetInt32("Numer"),
+                    Budynek = reader.GetString("Budynek"),
+                    Nazwa = reader.GetString("Nazwa"),
+                    Pietro = reader.GetInt32("Piętro"),
+                    Pojemnosc = reader.GetInt32("Pojemność"),
+                    Dostepna = reader.GetString("Dostępność") == "Dostępna"
+                });
+            }
+            return sale;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania sal: {ex.Message}");
+            return new List<Sala>();
+        }
     }
 
 }

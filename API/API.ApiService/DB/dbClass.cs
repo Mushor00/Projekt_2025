@@ -2,6 +2,7 @@ namespace API.ApiService.DB
 {
     public class Sale
     {
+        public int Id { get; set; }
         public int Numer { get; set; }
         public string? Budynek { get; set; }
         public string? Nazwa { get; set; }

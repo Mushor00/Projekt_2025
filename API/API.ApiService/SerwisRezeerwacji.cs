@@ -15,9 +15,9 @@ namespace API.ApiService
             _logger = logger;
         }
 
-        public async Task<bool> ZarezerwujSaleAsync(int numerSali, string nazwaPrzedmiotu, string login, DateOnly dataOd, TimeOnly godzinaOd, TimeOnly godzinaDo)
+        public async Task<(bool Success, string Message)> ZarezerwujSaleAsync(int idSali, string imie, string nazwisko, string nazwaPrzedmiotu, DateOnly data, TimeOnly godzinaOd, TimeOnly godzinaDo)
         {
-            return await _repo.ZarezerwujSale(numerSali, nazwaPrzedmiotu, login, dataOd, godzinaOd, godzinaDo);
+            return await _repo.ZarezerwujSale(idSali, imie, nazwisko, nazwaPrzedmiotu, data, godzinaOd, godzinaDo);
         }
 
         public async Task<bool> UsunRezerwacjeAsync(int idRezerwacji)

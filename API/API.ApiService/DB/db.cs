@@ -195,12 +195,13 @@ namespace API.ApiService.DB
                 {
                     var sale = new Sale
                     {
-                        Numer = reader.GetInt32("numer"),
-                        Budynek = reader.GetString("budynek"),
-                        Nazwa = reader.GetString("nazwa"),
-                        Pietro = reader.GetInt32("piętro"),
-                        Pojemnosc = reader.GetInt32("pojemność"),
-                        Dostepnosc = reader.GetString("dostępność"),
+                        Id = reader.GetInt32("ID"),
+                        Numer = reader.GetInt32("Numer"),
+                        Budynek = reader.GetString("Budynek"),
+                        Nazwa = reader.GetString("Nazwa"),
+                        Pietro = reader.GetInt32("Piętro"),
+                        Pojemnosc = reader.GetInt32("Pojemność"),
+                        Dostepnosc = reader.GetString("Dostępność"),
                         Projektor = reader.GetInt32("Projektor"),
                         Tablica = reader.GetInt32("Tablica"),
                         Klimatyzacja = reader.GetInt32("Klimatyzacja"),

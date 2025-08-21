@@ -54,7 +54,7 @@ public class SaleApiClient : ISaleApiClient
 
             return saleZBazy?.Select(s => new Sala
             {
-                Id = 0,
+                Id = s.Id, // Naprawione - używamy prawdziwego ID z bazy
                 Numer = s.Numer,
                 Budynek = s.Budynek ?? "",
                 Nazwa = s.Nazwa ?? "",

@@ -23,15 +23,15 @@ public class ReservationServiceTests
     public async Task ZarezerwujSaleAsync_PoprawneDane_ZwracaTrue()
     {
         // Arrange
-        _repoMock.Setup(r => r.ZarezerwujSale(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<DateTime>(), It.IsAny<DateTime>()))
-            .ReturnsAsync(true);
+        _repoMock.Setup(r => r.ZarezerwujSale(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<DateOnly>(), It.IsAny<TimeOnly>(), It.IsAny<TimeOnly>()))
+            .ReturnsAsync((true, "Sukces"));
 
         // Act
-        bool result = await _service.ZarezerwujSaleAsync(101, "user1", DateTime.Now, DateTime.Now.AddHours(2));
+        var result = await _service.ZarezerwujSaleAsync(101, "Jan", "Kowalski", "Matematyka", DateOnly.FromDateTime(DateTime.Now), new TimeOnly(9, 0), new TimeOnly(10, 0));
 
         // Assert
-        Assert.True(result);
-        _repoMock.Verify(r => r.ZarezerwujSale(101, "user1", It.IsAny<DateTime>(), It.IsAny<DateTime>()), Times.Once);
+        Assert.True(result.Success);
+        _repoMock.Verify(r => r.ZarezerwujSale(101, "Jan", "Kowalski", "Matematyka", It.IsAny<DateOnly>(), It.IsAny<TimeOnly>(), It.IsAny<TimeOnly>()), Times.Once);
     }
 
     [Fact]

@@ -4,38 +4,75 @@ namespace API.ApiService.DB;
 
 public class ReservationRepo(MySqlDataSource database)
 {
-    public async Task<bool> ZarezerwujSale(int numerSali, string Imie, string nazwaPrzedmiotu, DateOnly data, TimeOnly godzinaOd, TimeOnly godzinaDo)
+    public async Task<(bool Success, string Message)> ZarezerwujSale(int idSali, string imie, string nazwisko, string nazwaPrzedmiotu, DateOnly data, TimeOnly godzinaOd, TimeOnly godzinaDo)
     {
         using var conn = await database.OpenConnectionAsync();
+
+        // Sprawdź kolizje z istniejącymi rezerwacjami
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM sale_dostepnosc WHERE numerSali = @numerSali AND ((Godzina_rozpoczecia <= @godzinaDo AND Godzina_zakonczenia >= @godzinaOd))";
-        cmd.Parameters.AddWithValue("@numerSali", numerSali);
+        cmd.CommandText = "SELECT COUNT(*) FROM sale_dostepnosc WHERE ID_sale = @idSali AND Data = @data AND ((Godzina_rozpoczecia <= @godzinaDo AND Godzina_zakonczenia >= @godzinaOd))";
+        cmd.Parameters.AddWithValue("@idSali", idSali);
         cmd.Parameters.AddWithValue("@data", data);
         cmd.Parameters.AddWithValue("@godzinaOd", godzinaOd);
         cmd.Parameters.AddWithValue("@godzinaDo", godzinaDo);
 
-        var idSala = await GetIdSaliAsync(numerSali, conn);
-        if (idSala == 0) return false;
-
         var kolizje = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-        if (kolizje > 0) return false;
+        if (kolizje > 0) return (false, "Sala jest już zajęta w podanym terminie");
 
-        cmd.CommandText = "INSERT INTO sale_dostepnosc (ID_sale, ID_osoby, Nazwa_przedmiotu, Data, Godzina_rozpoczecia, Godzina_zakonczenia) VALUES (@idSala, @idOsoby, @nazwaPrzedmiotu, @data, @godzinaOd, @godzinaDo)";
+        // Pobierz ID osoby
+        var idOsoby = await GetIdOsobyAsync(imie, nazwisko, conn);
+        if (idOsoby == 0)
+        {
+            return (false, $"Nie znaleziono użytkownika: {imie} {nazwisko}");
+        }
+        else if (idOsoby == -1)
+        {
+            return (false, $"Znaleziono kilka osób o imieniu {imie}. Podaj pełne imię i nazwisko.");
+        }
 
-        var idOsoby = await GetIdOsobyAsync(Imie, conn);
-        cmd.Parameters.AddWithValue("@idSala", idSala);
+        // Dodaj rezerwację
+        cmd.CommandText = "INSERT INTO sale_dostepnosc (ID_sale, ID_osoby, Nazwa_przedmiotu, Data, Godzina_rozpoczecia, Godzina_zakonczenia) VALUES (@idSali, @idOsoby, @nazwaPrzedmiotu, @data, @godzinaOd, @godzinaDo)";
+        cmd.Parameters.Clear();
+        cmd.Parameters.AddWithValue("@idSali", idSali);
         cmd.Parameters.AddWithValue("@idOsoby", idOsoby);
         cmd.Parameters.AddWithValue("@nazwaPrzedmiotu", nazwaPrzedmiotu);
+        cmd.Parameters.AddWithValue("@data", data);
+        cmd.Parameters.AddWithValue("@godzinaOd", godzinaOd);
+        cmd.Parameters.AddWithValue("@godzinaDo", godzinaDo);
         await cmd.ExecuteNonQueryAsync();
-        return true;
+        return (true, "Rezerwacja została dodana pomyślnie");
     }
 
-    public async Task<int> GetIdOsobyAsync(string login, MySqlConnection conn)
+    public async Task<int> GetIdOsobyAsync(string imie, string nazwisko, MySqlConnection conn)
     {
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT ID FROM osoby WHERE Imie = @login";
-        cmd.Parameters.AddWithValue("@login", login);
+        cmd.CommandText = "SELECT ID FROM osoby WHERE Imie = @imie AND Nazwisko = @nazwisko";
+        cmd.Parameters.AddWithValue("@imie", imie);
+        cmd.Parameters.AddWithValue("@nazwisko", nazwisko);
         var result = await cmd.ExecuteScalarAsync();
+
+        // Jeśli nie znajdziemy dokładnego dopasowania, sprawdź czy jest tylko jedno imię
+        if (result == null)
+        {
+            cmd.CommandText = "SELECT COUNT(*), ID FROM osoby WHERE Imie = @imie";
+            cmd.Parameters.Clear();
+            cmd.Parameters.AddWithValue("@imie", imie);
+            using var reader = await cmd.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                var count = reader.GetInt32(0);
+                if (count == 1)
+                {
+                    return reader.GetInt32(1); // Zwróć ID jeśli jest tylko jedna osoba o tym imieniu
+                }
+                else if (count > 1)
+                {
+                    Console.WriteLine($"Znaleziono {count} osób o imieniu {imie}. Wymagane pełne imię i nazwisko.");
+                    return -1; // Specjalna wartość oznaczająca niejednoznaczność
+                }
+            }
+        }
+
         return result != null ? Convert.ToInt32(result) : 0;
     }
 
@@ -48,28 +85,23 @@ public class ReservationRepo(MySqlDataSource database)
         return await cmd.ExecuteNonQueryAsync() > 0;
     }
 
-    public async Task<int> GetIdSaliAsync(int numerSali, MySqlConnection conn)
-    {
-        using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT ID FROM sale WHERE Numer = @numerSali";
-        cmd.Parameters.AddWithValue("@numerSali", numerSali);
-        var result = await cmd.ExecuteScalarAsync();
-        return result != null ? Convert.ToInt32(result) : 0;
-    }
-
     public async Task<bool> EdytujRezerwacjeAsync(int id, DateOnly date, TimeOnly nowaOd, TimeOnly nowaDo)
     {
         using var conn = await database.OpenConnectionAsync();
         using var cmd = conn.CreateCommand();
-        cmd.CommandText = "SELECT COUNT(*) FROM sale_dostepnosc WHERE ID != @id AND ((Godzina_rozpoczecia <= @nowaDo AND Godzina_zakonczenia >= @nowaOd)) AND Data = @data";
+
+        // Sprawdź kolizje z innymi rezerwacjami (ale nie z tą samą)
+        cmd.CommandText = "SELECT COUNT(*) FROM sale_dostepnosc WHERE ID != @id AND Data = @data AND ((Godzina_rozpoczecia <= @nowaDo AND Godzina_zakonczenia >= @nowaOd))";
         cmd.Parameters.AddWithValue("@id", id);
+        cmd.Parameters.AddWithValue("@data", date);
         cmd.Parameters.AddWithValue("@nowaOd", nowaOd);
         cmd.Parameters.AddWithValue("@nowaDo", nowaDo);
-        cmd.Parameters.AddWithValue("@data", date);
+
         var kolizje = Convert.ToInt32(await cmd.ExecuteScalarAsync());
         if (kolizje > 0) return false;
 
-        cmd.CommandText = "UPDATE sale_dostepnosc SET Godzina_rozpoczecia = @nowaOd, Godzina_zakonczenia = @nowaDo WHERE ID = @id";
+        // Zaktualizuj rezerwację
+        cmd.CommandText = "UPDATE sale_dostepnosc SET Data = @data, Godzina_rozpoczecia = @nowaOd, Godzina_zakonczenia = @nowaDo WHERE ID = @id";
         return await cmd.ExecuteNonQueryAsync() > 0;
     }
 }

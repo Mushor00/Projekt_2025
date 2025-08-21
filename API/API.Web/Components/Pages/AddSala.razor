@@ -3,19 +3,21 @@
 @inject ISaleApiClient SaleApi
 @inject NavigationManager Navigation
 @using API.ApiService.Models
+@using System.ComponentModel.DataAnnotations
+@rendermode InteractiveServer
 
 <PageTitle>Dodaj Rezerwację</PageTitle>
 
 <h1 class="text-center">Dodaj Rezerwację</h1>
 
-<EditForm Model="rezerwacja" OnValidSubmit="ZarezerwujSale" @formname="rezerwacjaForm">
+<EditForm Model="rezerwacja" OnValidSubmit="ZarezerwujSale" FormName="AddReservationForm">
     <DataAnnotationsValidator />
     <ValidationSummary />
 
     <div style="max-width: 400px; margin: auto;">
         <div class="mb-3">
             <label class="form-label">Wybierz salę</label>
-            <InputSelect class="form-select" @bind-Value="rezerwacja.NumerSali">
+            <InputSelect class="form-select" @bind-Value="rezerwacja.IdSali" @bind-Value:format="0">
                 <option value="0" selected disabled >-- wybierz --</option>
                 @if (sale != null)
                 {
@@ -25,6 +27,7 @@
                     }
                 }
             </InputSelect>
+            <div class="form-text">Wybrana sala ID: @rezerwacja.IdSali</div>
         </div>
 
         <div class="mb-3">
@@ -48,8 +51,13 @@
         </div>
 
         <div class="mb-3">
-            <label class="form-label">Rezerwujący</label>
+            <label class="form-label">Imię rezerwującego</label>
             <InputText class="form-control" @bind-value="rezerwacja.Imie" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nazwisko rezerwującego</label>
+            <InputText class="form-control" @bind-value="rezerwacja.Nazwisko" />
         </div>
 
         <div class="d-flex justify-content-between">
@@ -81,6 +89,11 @@
         try
         {
             sale = await SaleApi.GetMappedSaleAsync();
+            Console.WriteLine($"DEBUG: Załadowano {sale?.Count ?? 0} sal");
+            if (sale != null && sale.Count > 0)
+            {
+                Console.WriteLine($"DEBUG: Pierwsza sala - Id: {sale[0].Id}, Nazwa: {sale[0].Nazwa}");
+            }
         }
         catch (Exception ex)
         {
@@ -95,7 +108,9 @@
         {
             czyBlad = false;
             
-            if (rezerwacja.NumerSali == 0)
+            Console.WriteLine($"DEBUG: IdSali = {rezerwacja.IdSali}");
+            
+            if (rezerwacja.IdSali == 0)
             {
                 wiadomosc = "Wybierz salę.";
                 czyBlad = true;
@@ -104,7 +119,14 @@
 
             if (string.IsNullOrWhiteSpace(rezerwacja.Imie))
             {
-                wiadomosc = "Podaj Imie rezerwującego.";
+                wiadomosc = "Podaj imię rezerwującego.";
+                czyBlad = true;
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(rezerwacja.Nazwisko))
+            {
+                wiadomosc = "Podaj nazwisko rezerwującego.";
                 czyBlad = true;
                 return;
             }
@@ -115,16 +137,14 @@
                 czyBlad = true;
                 return;
             }
-            rezerwacja.Imie = rezerwacja.Imie.Split(' ')[0]; // Pobieramy tylko pierwsze imię
+            
             rezerwacja.Data = rezerwacja.Data;
             rezerwacja.DataOd = rezerwacja.DataOd;
             rezerwacja.DataDo = rezerwacja.DataDo;
 
-               var sukces = await ReservationApi.ZarezerwujSaleAsync(rezerwacja);
+               var (sukces, komunikat) = await ReservationApi.ZarezerwujSaleAsync(rezerwacja);
 
-                wiadomosc = sukces
-                    ? "Rezerwacja zakończona sukcesem"
-                    : "Rezerwacja nie powiodła się — możliwy konflikt";
+                wiadomosc = komunikat;
                 czyBlad = !sukces;
         }
         catch (Exception ex)

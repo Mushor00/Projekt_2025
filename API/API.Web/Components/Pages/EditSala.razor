@@ -2,6 +2,7 @@
 @inject ISaleApiClient SaleApiClient
 @inject NavigationManager Navigation
 @using API.ApiService.Models
+@rendermode InteractiveServer
 
 <h3>Edycja sal</h3>
 
@@ -28,7 +29,7 @@ else
 
     @if (selectedSala != null)
     {
-        <EditForm Model="selectedSala" OnValidSubmit="ZapiszSale">
+        <EditForm Model="selectedSala" OnValidSubmit="ZapiszSale" FormName="EditSalaForm">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
