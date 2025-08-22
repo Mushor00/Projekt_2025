@@ -180,6 +180,7 @@ namespace API.ApiService.DB
                     Komputerowa = reader.GetInt32(reader.GetOrdinal("Komputerowa")),
                     Niepelnosprawni = reader.GetInt32(reader.GetOrdinal("Dla_niepelnosprawnych")),
                     Ulica = reader.GetString(reader.GetOrdinal("Ulica")),
+                    Dostepnosc = reader.GetString(reader.GetOrdinal("Dostępność"))
                 });
             }
 
