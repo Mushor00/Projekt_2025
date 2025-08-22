@@ -38,3 +38,18 @@ public class RezerwacjaDto
     public TimeOnly GodzinaRozpoczecia { get; set; }
     public TimeOnly GodzinaZakonczenia { get; set; }
 }
+
+public class RezerwacjaKalendarzDto
+{
+    public int Id { get; set; }
+    public int IdSali { get; set; }
+    public int IdOsoby { get; set; }
+    public DateOnly Data { get; set; }
+    public TimeOnly GodzinaRozpoczecia { get; set; }
+    public TimeOnly GodzinaZakonczenia { get; set; }
+    public string NazwaPrzedmiotu { get; set; } = string.Empty;
+    public string NazwaSali { get; set; } = string.Empty;
+    public string Budynek { get; set; } = string.Empty;
+    public string ImieOsoby { get; set; } = string.Empty;
+    public string NazwiskoOsoby { get; set; } = string.Empty;
+}

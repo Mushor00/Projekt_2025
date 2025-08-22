@@ -109,4 +109,105 @@ public class ReservationApiClient : IReservationApiClient
         }
     }
 
+    public async Task<List<RezerwacjaDto>?> GetAllRezerwacjeByDate(DateOnly data)
+    {
+        try
+        {
+            using var conn = await _dataSource.OpenConnectionAsync();
+            using var cmd = conn.CreateCommand();
+
+            // Pobierz wszystkie rezerwacje na dany dzień z informacjami o salach i osobach
+            cmd.CommandText = @"
+                SELECT sd.ID, sd.ID_sale, sd.ID_osoby, sd.Data, 
+                       sd.Godzina_rozpoczecia, sd.Godzina_zakonczenia,
+                       sd.Nazwa_przedmiotu, s.Nazwa as NazwaSali, s.Budynek,
+                       o.Imie, o.Nazwisko
+                FROM sale_dostepnosc sd 
+                JOIN sale s ON sd.ID_sale = s.ID
+                JOIN osoby o ON sd.ID_osoby = o.ID
+                WHERE sd.Data = @data
+                ORDER BY s.Nazwa, sd.Godzina_rozpoczecia";
+
+            cmd.Parameters.AddWithValue("@data", data);
+
+            var rezerwacje = new List<RezerwacjaDto>();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                var rezerwacja = new RezerwacjaDto
+                {
+                    Id = reader.GetInt32("ID"),
+                    IdSali = reader.GetInt32("ID_sale"),
+                    IdOsoby = reader.GetInt32("ID_osoby"),
+                    Data = DateOnly.FromDateTime(reader.GetDateTime("Data")),
+                    GodzinaRozpoczecia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_rozpoczecia")),
+                    GodzinaZakonczenia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_zakonczenia"))
+                };
+
+                rezerwacje.Add(rezerwacja);
+            }
+
+            return rezerwacje;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania rezerwacji: {ex.Message}");
+            return new List<RezerwacjaDto>();
+        }
+    }
+
+    public async Task<List<RezerwacjaKalendarzDto>?> GetRezerwacjeKalendarzByDate(DateOnly data)
+    {
+        try
+        {
+            using var conn = await _dataSource.OpenConnectionAsync();
+            using var cmd = conn.CreateCommand();
+
+            // Pobierz wszystkie rezerwacje na dany dzień z dodatkowymi informacjami dla kalendarza
+            cmd.CommandText = @"
+                SELECT sd.ID, sd.ID_sale, sd.ID_osoby, sd.Data, 
+                       sd.Godzina_rozpoczecia, sd.Godzina_zakonczenia,
+                       sd.Nazwa_przedmiotu, s.Nazwa as NazwaSali, s.Budynek,
+                       o.Imie, o.Nazwisko
+                FROM sale_dostepnosc sd 
+                JOIN sale s ON sd.ID_sale = s.ID
+                JOIN osoby o ON sd.ID_osoby = o.ID
+                WHERE sd.Data = @data
+                ORDER BY s.Nazwa, sd.Godzina_rozpoczecia";
+
+            cmd.Parameters.AddWithValue("@data", data);
+
+            var rezerwacje = new List<RezerwacjaKalendarzDto>();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                var rezerwacja = new RezerwacjaKalendarzDto
+                {
+                    Id = reader.GetInt32("ID"),
+                    IdSali = reader.GetInt32("ID_sale"),
+                    IdOsoby = reader.GetInt32("ID_osoby"),
+                    Data = DateOnly.FromDateTime(reader.GetDateTime("Data")),
+                    GodzinaRozpoczecia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_rozpoczecia")),
+                    GodzinaZakonczenia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_zakonczenia")),
+                    NazwaPrzedmiotu = reader.GetString("Nazwa_przedmiotu"),
+                    NazwaSali = reader.GetString("NazwaSali"),
+                    Budynek = reader.GetString("Budynek"),
+                    ImieOsoby = reader.GetString("Imie"),
+                    NazwiskoOsoby = reader.GetString("Nazwisko")
+                };
+
+                rezerwacje.Add(rezerwacja);
+            }
+
+            return rezerwacje;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania rezerwacji kalendarza: {ex.Message}");
+            return new List<RezerwacjaKalendarzDto>();
+        }
+    }
+
 }

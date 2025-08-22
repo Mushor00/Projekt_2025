@@ -1,12 +1,19 @@
 ﻿@page "/calendar"
 @using API.ApiService.DB
+@using API.ApiService.Models
 @using API.ApiService.Filters
 @inject ISaleApiClient SaleApiClient
+@inject IReservationApiClient ReservationApiClient
 @rendermode InteractiveServer
 
 <h2 class="text-center mb-4">Kalendarz rezerwacji</h2>
 
-@if (sales is null)
+<div class="mb-3 text-center">
+    <label for="selectedDate" class="form-label">Wybierz datę:</label>
+    <input type="date" id="selectedDate" class="form-control" style="max-width: 200px; margin: auto;" @bind="selectedDate" @bind:after="LoadRezerwacje" />
+</div>
+
+@if (sales is null || rezerwacje is null)
 {
     <p><em>Ładowanie...</em></p>
 }
@@ -30,44 +37,30 @@ else
                     <td><strong>@sala.Nazwa</strong></td>
                         @for (int hour = 8; hour <= 18; hour++)
                         {
-                            //Rezerwacje
-                            @if (sala.Nazwa == "K21" && hour == 9)
+                            var rezerwacjaWTejGodzinie = rezerwacje?.FirstOrDefault(r => 
+                                r.NazwaSali == sala.Nazwa && 
+                                r.GodzinaRozpoczecia.Hour <= hour && 
+                                r.GodzinaZakonczenia.Hour > hour);
+
+                            @if (rezerwacjaWTejGodzinie != null)
                             {
-                                <td colspan="2" class="bg-info text-white text-center align-middle">
-                                    <div><strong>Bazy Danych</strong></div>
-                                    <div>Prof. Nowak</div>
-                                </td>
-                                hour++;
-                            }
-                            else if (sala.Nazwa == "P21" && hour == 10)
-                            {
-                                <td colspan="2" class="bg-info text-white text-center align-middle">
-                                    <div><strong>Inzyniera Oprogramowania</strong></div>
-                                    <div>Prof. Nowak</div>
-                                </td>
-                                hour++;
-                            }
-                            else if (sala.Nazwa == "A1" && hour == 11)
-                            {
-                                <td colspan="2" class="bg-info text-white text-center align-middle">
-                                    <div><strong>Systemy Szkieletowe</strong></div>
-                                    <div>Prof. Nowak</div>
-                                </td>
-                                hour++;
-                            }
-                            else if (sala.Nazwa == "K42" && hour == 15)
-                            {
-                                <td colspan="2" class="bg-info text-white text-center align-middle">
-                                    <div><strong>Ochrona Danych</strong></div>
-                                    <div>Prof. Nowak</div>
-                                </td>
-                                hour++;
+                                // Sprawdź czy to pierwsza godzina rezerwacji
+                                @if (rezerwacjaWTejGodzinie.GodzinaRozpoczecia.Hour == hour)
+                                {
+                                    var dlugoscRezerwacji = rezerwacjaWTejGodzinie.GodzinaZakonczenia.Hour - rezerwacjaWTejGodzinie.GodzinaRozpoczecia.Hour;
+                                    <td colspan="@dlugoscRezerwacji" class="bg-info text-white text-center align-middle">
+                                        <div><strong>@rezerwacjaWTejGodzinie.NazwaPrzedmiotu</strong></div>
+                                        <div>@rezerwacjaWTejGodzinie.ImieOsoby @rezerwacjaWTejGodzinie.NazwiskoOsoby</div>
+                                        <div><small>@rezerwacjaWTejGodzinie.GodzinaRozpoczecia.ToString("HH:mm") - @rezerwacjaWTejGodzinie.GodzinaZakonczenia.ToString("HH:mm")</small></div>
+                                    </td>
+                                    // Pomiń kolejne godziny tej rezerwacji
+                                    hour += dlugoscRezerwacji - 1;
+                                }
                             }
                             else
                             {
                                 <td></td>
                             }
-
                         }
 
                 </tr>
@@ -78,17 +71,34 @@ else
 }
 
 @code {
-    private List<Sale> sales;
+    private List<Sale>? sales;
+    private List<RezerwacjaKalendarzDto>? rezerwacje;
+    private DateOnly selectedDate = DateOnly.FromDateTime(DateTime.Today);
 
     protected override async Task OnInitializedAsync()
     {
         try
         {
             sales = await SaleApiClient.IGetSaleAsync();
+            await LoadRezerwacje();
         }
         catch (Exception ex)
         {
             Console.WriteLine("Błąd w komponencie: " + ex.Message);
+        }
+    }
+
+    private async Task LoadRezerwacje()
+    {
+        try
+        {
+            rezerwacje = await ReservationApiClient.GetRezerwacjeKalendarzByDate(selectedDate);
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Błąd ładowania rezerwacji: " + ex.Message);
+            rezerwacje = new List<RezerwacjaKalendarzDto>();
         }
     }
 }
