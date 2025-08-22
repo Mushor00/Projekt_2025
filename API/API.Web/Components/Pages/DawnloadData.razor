@@ -1,12 +1,354 @@
 ﻿@page "/dawnloadData"
+@inject IReservationApiClient ReservationApiClient
+@inject IJSRuntime JSRuntime
+@using API.ApiService.Models
+@rendermode InteractiveServer
 
 <PageTitle>Pobieranie</PageTitle>
 
 <div class="d-flex flex-column justify-content-center align-items-center">
     <h1>Pobierz dane</h1>
 
-    <form>
-        <button class="btn btn-primary">Pobierz Sale</button>
-        <a class="btn btn-danger" href="#" role="button">Anuluj</a>
-    </form>
+    @if (!string.IsNullOrEmpty(wiadomosc))
+    {
+        <div class="alert @(czyBlad ? "alert-danger" : "alert-success") mt-3" style="max-width: 600px;">
+            @wiadomosc
+        </div>
+    }
+
+    <div class="mt-4">
+        <button class="btn btn-primary me-3" @onclick="PobierzRezerwacjePDF" disabled="@isGenerating">
+            @if (isGenerating)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                <span>Generowanie...</span>
+            }
+            else
+            {
+                <span class="bi bi-file-earmark-pdf-fill me-2"></span>
+                <span>Pobierz raport PDF</span>
+            }
+        </button>
+        
+        <button class="btn btn-secondary" @onclick="PobierzRezerwacjeCSV" disabled="@isGenerating">
+            @if (isGenerating)
+            {
+                <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+            }
+            else
+            {
+                <span class="bi bi-file-earmark-spreadsheet-fill me-2"></span>
+            }
+            <span>Pobierz rezerwacje (CSV)</span>
+        </button>
+        
+        <a class="btn btn-danger ms-3" href="/" role="button">Anuluj</a>
+    </div>
+    
+    <div class="mt-4">
+        <div class="alert alert-info" style="max-width: 800px;">
+            <h6><i class="bi bi-info-circle-fill me-2"></i>Informacje o pobieraniu:</h6>
+            <ul class="mb-0">
+                <li><strong>Raport PDF:</strong> Generowany automatycznie z wszystkimi danymi rezerwacji w profesjonalnym formacie A4</li>
+                <li><strong>Eksport CSV:</strong> Dane w formacie arkusza kalkulacyjnego, kompatybilne z Excel</li>
+                <li>Pliki zawierają informacje o autorach i copyright</li>
+                <li>Generowanie może potrwać kilka sekund dla dużej liczby rekordów</li>
+            </ul>
+        </div>
+    </div>
 </div>
+
+@code {
+    private string wiadomosc = "";
+    private bool czyBlad = false;
+    private bool isGenerating = false;
+
+    private async Task PobierzRezerwacjePDF()
+    {
+        try
+        {
+            isGenerating = true;
+            wiadomosc = "";
+            StateHasChanged();
+
+            // Pobierz wszystkie rezerwacje
+            var rezerwacje = await ReservationApiClient.GetAllRezerwacje();
+            
+            if (rezerwacje == null || !rezerwacje.Any())
+            {
+                wiadomosc = "Brak rezerwacji do pobrania.";
+                czyBlad = true;
+                return;
+            }
+
+            // Generuj HTML do PDF
+            var htmlContent = GenerujHtmlDlaRezerwacji(rezerwacje);
+            var fileName = $"rezerwacje_SAN_{DateTime.Now:yyyy-MM-dd}.pdf";
+            
+            // Użyj JavaScript do wygenerowania prawdziwego PDF
+            var success = await JSRuntime.InvokeAsync<bool>("generatePDFFromHTML", htmlContent, fileName);
+            
+            if (success)
+            {
+                wiadomosc = $"Pomyślnie wygenerowano plik PDF z {rezerwacje.Count} rezerwacjami.";
+                czyBlad = false;
+            }
+            else
+            {
+                wiadomosc = "Wystąpił błąd podczas generowania PDF.";
+                czyBlad = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd podczas generowania pliku PDF: {ex.Message}";
+            czyBlad = true;
+        }
+        finally
+        {
+            isGenerating = false;
+            StateHasChanged();
+        }
+    }
+
+    private async Task PobierzRezerwacjeCSV()
+    {
+        try
+        {
+            isGenerating = true;
+            wiadomosc = "";
+            StateHasChanged();
+
+            // Pobierz wszystkie rezerwacje
+            var rezerwacje = await ReservationApiClient.GetAllRezerwacje();
+            
+            if (rezerwacje == null || !rezerwacje.Any())
+            {
+                wiadomosc = "Brak rezerwacji do pobrania.";
+                czyBlad = true;
+                return;
+            }
+
+            // Generuj CSV
+            var csvContent = GenerujCSVDlaRezerwacji(rezerwacje);
+            // Użyj UTF-8 z BOM dla poprawnego wyświetlania polskich znaków
+            var encoding = new System.Text.UTF8Encoding(true);
+            var csvBytes = encoding.GetBytes(csvContent);
+            var fileName = $"rezerwacje_{DateTime.Now:yyyy-MM-dd}.csv";
+            
+            await PobierzPlik(csvBytes, fileName, "text/csv; charset=utf-8");
+            
+            wiadomosc = $"Pomyślnie wygenerowano plik CSV z {rezerwacje.Count} rezerwacjami.";
+            czyBlad = false;
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd podczas generowania pliku CSV: {ex.Message}";
+            czyBlad = true;
+        }
+        finally
+        {
+            isGenerating = false;
+            StateHasChanged();
+        }
+    }
+
+    private string GenerujHtmlDlaRezerwacji(List<RezerwacjaKalendarzDto> rezerwacje)
+    {
+        var html = @"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='utf-8'>
+    <title>Lista rezerwacji sal</title>
+    <style>
+        @page { 
+            size: A4; 
+            margin: 1cm; 
+        }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px;
+            background: white;
+        }
+        .header { 
+            text-align: center; 
+            margin-bottom: 30px;
+            border-bottom: 3px solid #073980;
+            padding-bottom: 20px;
+        }
+        .logo-area {
+            margin-bottom: 20px;
+        }
+        h1 { 
+            color: #073980; 
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .subtitle {
+            color: #666;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 20px 0;
+            font-size: 12px;
+            background: white;
+        }
+        th { 
+            background-color: #073980; 
+            color: white; 
+            padding: 12px 8px;
+            text-align: left;
+            font-weight: bold;
+            border: 1px solid #054173;
+        }
+        td { 
+            padding: 10px 8px;
+            border: 1px solid #ddd; 
+            vertical-align: top;
+        }
+        tr:nth-child(even) { 
+            background-color: #f8f9fa; 
+        }
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+        .date { 
+            white-space: nowrap; 
+            font-weight: 500;
+        }
+        .time {
+            color: #073980;
+            font-weight: 600;
+        }
+        .room {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .subject {
+            font-style: italic;
+            color: #1565c0;
+        }
+        .footer { 
+            margin-top: 40px; 
+            text-align: center; 
+            color: #666;
+            font-size: 11px;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+        .stats {
+            background-color: #f5f5f5;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            border-left: 4px solid #073980;
+        }
+        .stats h3 {
+            margin: 0 0 10px 0;
+            color: #073980;
+            font-size: 16px;
+        }
+        @media print {
+            body { 
+                background: white !important; 
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+            }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class='header'>
+        <h1>RAPORT REZERWACJI SAL</h1>
+        <div class='subtitle'>Społeczna Akademia Nauk</div>
+        <div class='subtitle'>Wygenerowano: " + DateTime.Now.ToString("dd.MM.yyyy HH:mm") + @"</div>
+    </div>
+    
+    <div class='stats'>
+        <h3>Podsumowanie</h3>
+        <p><strong>Łączna liczba rezerwacji:</strong> " + rezerwacje.Count + @"</p>
+        <p><strong>Okres:</strong> " + (rezerwacje.Any() ? $"{rezerwacje.Min(r => r.Data):dd.MM.yyyy} - {rezerwacje.Max(r => r.Data):dd.MM.yyyy}" : "Brak danych") + @"</p>
+        <p><strong>Liczba różnych sal:</strong> " + rezerwacje.Select(r => r.NazwaSali).Distinct().Count() + @"</p>
+    </div>
+    
+    <table>
+        <thead>
+            <tr>
+                <th style='width: 5%;'>ID</th>
+                <th style='width: 15%;'>Sala</th>
+                <th style='width: 10%;'>Budynek</th>
+                <th style='width: 12%;'>Data</th>
+                <th style='width: 10%;'>Rozpoczęcie</th>
+                <th style='width: 10%;'>Zakończenie</th>
+                <th style='width: 20%;'>Przedmiot</th>
+                <th style='width: 18%;'>Prowadzący</th>
+            </tr>
+        </thead>
+        <tbody>";
+
+        foreach (var r in rezerwacje.OrderBy(x => x.Data).ThenBy(x => x.GodzinaRozpoczecia))
+        {
+            html += $@"
+            <tr>
+                <td>{r.Id}</td>
+                <td class='room'>{r.NazwaSali}</td>
+                <td>{r.Budynek}</td>
+                <td class='date'>{r.Data:dd.MM.yyyy}</td>
+                <td class='time'>{r.GodzinaRozpoczecia:HH:mm}</td>
+                <td class='time'>{r.GodzinaZakonczenia:HH:mm}</td>
+                <td class='subject'>{r.NazwaPrzedmiotu}</td>
+                <td>{r.ImieOsoby} {r.NazwiskoOsoby}</td>
+            </tr>";
+        }
+
+        html += @"
+        </tbody>
+    </table>
+    
+    <div class='footer'>
+        <p><strong>System Rezerwacji Sal</strong> | Społeczna Akademia Nauk</p>
+        <p>Raport wygenerowany automatycznie | " + DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss") + @"</p>
+        <hr style='margin: 20px 0; border-top: 1px solid #ddd;'>
+        <p style='font-size: 11px; color: #666; margin: 0;'>
+            © " + DateTime.Now.Year + @" Społeczna Akademia Nauk. Wszystkie prawa zastrzeżone.
+        </p>
+        <p style='font-size: 10px; color: #888; margin: 5px 0 0 0;'>
+            <strong>Stworzone przez:</strong> Martyna Alicka, Kacper Jędrzejczak, Oskar Libert i Julka Wieczorek
+        </p>
+    </div>
+</body>
+</html>";
+
+        return html;
+    }
+
+    private string GenerujCSVDlaRezerwacji(List<RezerwacjaKalendarzDto> rezerwacje)
+    {
+        var csv = "# Raport Rezerwacji Sal - Społeczna Akademia Nauk\n";
+        csv += $"# Wygenerowano: {DateTime.Now:dd.MM.yyyy HH:mm:ss}\n";
+        csv += $"# © {DateTime.Now.Year} Społeczna Akademia Nauk. Wszystkie prawa zastrzeżone.\n";
+        csv += "# Stworzone przez: Martyna Alicka, Kacper Jędrzejczak, Oskar Libert i Julka Wieczorek\n";
+        csv += "#\n";
+        csv += "ID;Sala;Budynek;Data;Godzina rozpoczęcia;Godzina zakończenia;Przedmiot;Imię prowadzącego;Nazwisko prowadzącego\n";
+        
+        foreach (var r in rezerwacje.OrderBy(x => x.Data).ThenBy(x => x.GodzinaRozpoczecia))
+        {
+            csv += $"{r.Id};{r.NazwaSali};{r.Budynek};{r.Data:dd.MM.yyyy};{r.GodzinaRozpoczecia:HH:mm};{r.GodzinaZakonczenia:HH:mm};{r.NazwaPrzedmiotu};{r.ImieOsoby};{r.NazwiskoOsoby}\n";
+        }
+        
+        return csv;
+    }
+
+    private async Task PobierzPlik(byte[] fileBytes, string fileName, string contentType)
+    {
+        var base64 = Convert.ToBase64String(fileBytes);
+        await JSRuntime.InvokeVoidAsync("downloadFile", fileName, base64, contentType);
+    }
+}

@@ -33,7 +33,7 @@ namespace API.ApiService
             }
         }
 
-        public async Task<bool> EdytujRezerwacjeAsync(int idRezerwacji, DateOnly data, TimeOnly nowaGodzinaOd, TimeOnly nowaGodzinaDo)
+        public async Task<(bool Success, string Message)> EdytujRezerwacjeAsync(int idRezerwacji, DateOnly data, TimeOnly nowaGodzinaOd, TimeOnly nowaGodzinaDo)
         {
             try
             {
@@ -42,7 +42,7 @@ namespace API.ApiService
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Błąd podczas edytowania rezerwacji.");
-                return false;
+                return (false, "Wystąpił błąd podczas edytowania rezerwacji");
             }
         }
     }

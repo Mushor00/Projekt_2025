@@ -210,4 +210,128 @@ public class ReservationApiClient : IReservationApiClient
         }
     }
 
+    public async Task<List<RezerwacjaKalendarzDto>?> GetAllRezerwacje()
+    {
+        try
+        {
+            using var conn = await _dataSource.OpenConnectionAsync();
+            using var cmd = conn.CreateCommand();
+
+            cmd.CommandText = @"
+                SELECT sd.ID, sd.ID_sale, sd.ID_osoby, sd.Data, 
+                       sd.Godzina_rozpoczecia, sd.Godzina_zakonczenia,
+                       sd.Nazwa_przedmiotu, s.Nazwa as NazwaSali, s.Budynek,
+                       o.Imie, o.Nazwisko
+                FROM sale_dostepnosc sd 
+                JOIN sale s ON sd.ID_sale = s.ID
+                JOIN osoby o ON sd.ID_osoby = o.ID
+                ORDER BY sd.Data DESC, s.Nazwa, sd.Godzina_rozpoczecia";
+
+            var rezerwacje = new List<RezerwacjaKalendarzDto>();
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            while (await reader.ReadAsync())
+            {
+                var rezerwacja = new RezerwacjaKalendarzDto
+                {
+                    Id = reader.GetInt32("ID"),
+                    IdSali = reader.GetInt32("ID_sale"),
+                    IdOsoby = reader.GetInt32("ID_osoby"),
+                    Data = DateOnly.FromDateTime(reader.GetDateTime("Data")),
+                    GodzinaRozpoczecia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_rozpoczecia")),
+                    GodzinaZakonczenia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_zakonczenia")),
+                    NazwaPrzedmiotu = reader.GetString("Nazwa_przedmiotu"),
+                    NazwaSali = reader.GetString("NazwaSali"),
+                    Budynek = reader.GetString("Budynek"),
+                    ImieOsoby = reader.GetString("Imie"),
+                    NazwiskoOsoby = reader.GetString("Nazwisko")
+                };
+
+                rezerwacje.Add(rezerwacja);
+            }
+
+            return rezerwacje;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania wszystkich rezerwacji: {ex.Message}");
+            return new List<RezerwacjaKalendarzDto>();
+        }
+    }
+
+    public async Task<RezerwacjaKalendarzDto?> GetRezerwacjaById(int id)
+    {
+        try
+        {
+            using var conn = await _dataSource.OpenConnectionAsync();
+            using var cmd = conn.CreateCommand();
+
+            cmd.CommandText = @"
+                SELECT sd.ID, sd.ID_sale, sd.ID_osoby, sd.Data, 
+                       sd.Godzina_rozpoczecia, sd.Godzina_zakonczenia,
+                       sd.Nazwa_przedmiotu, s.Nazwa as NazwaSali, s.Budynek,
+                       o.Imie, o.Nazwisko
+                FROM sale_dostepnosc sd 
+                JOIN sale s ON sd.ID_sale = s.ID
+                JOIN osoby o ON sd.ID_osoby = o.ID
+                WHERE sd.ID = @id";
+
+            cmd.Parameters.AddWithValue("@id", id);
+
+            using var reader = await cmd.ExecuteReaderAsync();
+
+            if (await reader.ReadAsync())
+            {
+                return new RezerwacjaKalendarzDto
+                {
+                    Id = reader.GetInt32("ID"),
+                    IdSali = reader.GetInt32("ID_sale"),
+                    IdOsoby = reader.GetInt32("ID_osoby"),
+                    Data = DateOnly.FromDateTime(reader.GetDateTime("Data")),
+                    GodzinaRozpoczecia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_rozpoczecia")),
+                    GodzinaZakonczenia = TimeOnly.FromTimeSpan(reader.GetTimeSpan("Godzina_zakonczenia")),
+                    NazwaPrzedmiotu = reader.GetString("Nazwa_przedmiotu"),
+                    NazwaSali = reader.GetString("NazwaSali"),
+                    Budynek = reader.GetString("Budynek"),
+                    ImieOsoby = reader.GetString("Imie"),
+                    NazwiskoOsoby = reader.GetString("Nazwisko")
+                };
+            }
+
+            return null;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd pobierania rezerwacji: {ex.Message}");
+            return null;
+        }
+    }
+
+    public async Task<(bool Success, string Message)> UpdateRezerwacjaAsync(int id, RezerwacjaRequest request)
+    {
+        try
+        {
+            var repo = new ReservationRepo(_dataSource);
+            return await repo.EdytujRezerwacjeAsync(id, request.Data, request.DataOd, request.DataDo);
+        }
+        catch (Exception ex)
+        {
+            return (false, $"Błąd aktualizacji rezerwacji: {ex.Message}");
+        }
+    }
+
+    public async Task<bool> DeleteRezerwacjaAsync(int id)
+    {
+        try
+        {
+            var repo = new ReservationRepo(_dataSource);
+            return await repo.UsunRezerwacjeAsync(id);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Błąd usuwania rezerwacji: {ex.Message}");
+            return false;
+        }
+    }
+
 }

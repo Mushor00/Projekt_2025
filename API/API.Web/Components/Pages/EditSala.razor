@@ -1,74 +1,87 @@
-@page "/editSala"
+@page "/editRezerwacja"
+@inject IReservationApiClient ReservationApiClient
 @inject ISaleApiClient SaleApiClient
 @inject NavigationManager Navigation
+@inject IJSRuntime JSRuntime
 @using API.ApiService.Models
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
 
 <div class="text-center">
-    <h3>Edycja sal</h3>
+    <h1>Edycja rezerwacji</h1>
 </div>
 
 
-@if (sale == null)
+@if (rezerwacje == null)
 {
-    <p><em>Ładowanie sal...</em></p>
+    <p><em>Ładowanie rezerwacji...</em></p>
 }
-else if (sale.Count == 0)
+else if (rezerwacje.Count == 0)
 {
-    <p><em>Brak sal do wyświetlenia.</em></p>
+    <p><em>Brak rezerwacji do wyświetlenia.</em></p>
 }
 else
 {
-    <div style="max-width: 400px; margin: auto;">
+    <div style="max-width: 600px; margin: auto;">
         <div class="mb-3">
-            <label>Wybierz salę</label>
-            <select class="form-select" @onchange="OnSalaChanged">
+            <label>Wybierz rezerwację</label>
+            <select class="form-select" @onchange="OnRezerwacjaChangedWithId">
                 <option value="">-- wybierz --</option>
-                @foreach (var s in sale)
+                @foreach (var r in rezerwacje)
                 {
-                    <option value="@s.Id">@s.Nazwa (@s.Budynek)</option>
+                    <option value="@r.Id">@r.NazwaSali - @r.Data (@r.GodzinaRozpoczecia - @r.GodzinaZakonczenia)</option>
                 }
             </select>
         </div>
     </div>
 
-        <EditForm Model="selectedSala" OnValidSubmit="ZapiszSale" FormName="EditSalaForm">
+        <EditForm Model="selectedRezerwacja" OnValidSubmit="ZapiszRezerwacje" FormName="EditRezerwacjaForm">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div style="max-width: 400px; margin: auto;">
+            <div style="max-width: 600px; margin: auto;">
                 <div class="mb-3">
-                    <label class="form-label">Numer</label>
-                    <InputNumber class="form-control" @bind-Value="selectedSala.Numer" />
+                    <label class="form-label">Data</label>
+                    <InputDate class="form-control" @bind-Value="selectedRezerwacja.Data" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Budynek</label>
-                    <InputText class="form-control" @bind-Value="selectedSala.Budynek" />
+                    <label class="form-label">Godzina rozpoczęcia</label>
+                    <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="dataOdDateTime" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Nazwa</label>
-                    <InputText class="form-control" @bind-Value="selectedSala.Nazwa" />
+                    <label class="form-label">Godzina zakończenia</label>
+                    <InputDate Type="InputDateType.Time" class="form-control" @bind-Value="dataDoDateTime" />
                 </div>
 
                 <div class="mb-3">
-                    <label class="form-label">Pietro</label>
-                    <InputNumber class="form-control" @bind-Value="selectedSala.Pietro" />
+                    <label class="form-label">Sala</label>
+                    <select class="form-select" @bind="selectedRezerwacja.IdSali">
+                        <option value="">-- wybierz salę --</option>
+                        @if (sale != null)
+                        {
+                            @foreach (var sala in sale)
+                            {
+                                <option value="@sala.Id">@sala.Nazwa (@sala.Budynek)</option>
+                            }
+                        }
+                    </select>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Pojemność</label>
-                    <InputNumber class="form-control" @bind-Value="selectedSala.Pojemnosc" />
+                <div class="d-flex gap-2">
+                    <button type="submit" class="btn btn-primary">
+                        <span class="bi bi-check-lg me-1"></span>
+                        Zapisz zmiany
+                    </button>
+                    
+                    <button type="button" class="btn btn-danger" @onclick="UsunRezerwacje" 
+                            disabled="@(selectedRezerwacjaId == 0)"
+                            @onclick:preventDefault="true">
+                        <span class="bi bi-trash-fill me-1"></span>
+                        Usuń rezerwację
+                    </button>
                 </div>
-
-                <div class="mb-3">
-                    <label class="form-label">Dostępna</label>
-                    <InputCheckbox class="form-check-input" @bind-Value="selectedSala.Dostepna" />
-                </div>
-
-                <button type="submit" class="btn btn-primary">Zapisz</button>
             </div>
         </EditForm>
 
@@ -79,8 +92,11 @@ else
 }
 
 @code {
+    private List<RezerwacjaKalendarzDto>? rezerwacje;
     private List<Sala>? sale;
-    private Sala selectedSala = new Sala();
+    private RezerwacjaRequest selectedRezerwacja = new RezerwacjaRequest();
+    private DateTime dataOdDateTime = DateTime.Now.Date.AddHours(8);
+    private DateTime dataDoDateTime = DateTime.Now.Date.AddHours(9);
     private string wiadomosc = "";
     private bool czyBlad = false;
 
@@ -88,62 +104,145 @@ else
     {
         try
         {
+            // Ładuj rezerwacje i sale
+            rezerwacje = await ReservationApiClient.GetAllRezerwacje();
             sale = await SaleApiClient.GetMappedSaleAsync();
         }
         catch (Exception ex)
         {
-            wiadomosc = $"Błąd ładowania sal: {ex.Message}";
+            wiadomosc = $"Błąd ładowania danych: {ex.Message}";
             czyBlad = true;
         }
     }
 
-    private void OnSalaChanged(ChangeEventArgs e)
+    private async Task ZapiszRezerwacje()
+    {
+        try
+        {
+            if (selectedRezerwacjaId == 0)
+            {
+                wiadomosc = "Nie wybrano rezerwacji do edycji.";
+                czyBlad = true;
+                return;
+            }
+
+            // Konwertuj DateTime z kontrolek na TimeOnly
+            selectedRezerwacja.DataOd = TimeOnly.FromDateTime(dataOdDateTime);
+            selectedRezerwacja.DataDo = TimeOnly.FromDateTime(dataDoDateTime);
+
+            var result = await ReservationApiClient.UpdateRezerwacjaAsync(selectedRezerwacjaId, selectedRezerwacja);
+            
+            if (result.Success)
+            {
+                wiadomosc = result.Message;
+                czyBlad = false;
+                
+                // Odśwież listę rezerwacji
+                rezerwacje = await ReservationApiClient.GetAllRezerwacje();
+            }
+            else
+            {
+                wiadomosc = result.Message;
+                czyBlad = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd zapisu rezerwacji: {ex.Message}";
+            czyBlad = true;
+        }
+    }
+
+    private async Task UsunRezerwacje()
+    {
+        try
+        {
+            if (selectedRezerwacjaId == 0)
+            {
+                wiadomosc = "Nie wybrano rezerwacji do usunięcia.";
+                czyBlad = true;
+                return;
+            }
+
+            // Potwierdzenie usunięcia (w przyszłości można dodać modal)
+            var potwierdzenie = await JSRuntime.InvokeAsync<bool>("confirm", 
+                "Czy na pewno chcesz usunąć tę rezerwację? Ta operacja jest nieodwracalna.");
+            
+            if (!potwierdzenie)
+                return;
+
+            var sukces = await ReservationApiClient.DeleteRezerwacjaAsync(selectedRezerwacjaId);
+            
+            if (sukces)
+            {
+                wiadomosc = "Rezerwacja została pomyślnie usunięta.";
+                czyBlad = false;
+                
+                // Wyczyść formularz i odśwież listę
+                selectedRezerwacjaId = 0;
+                selectedRezerwacja = new RezerwacjaRequest();
+                dataOdDateTime = DateTime.Now.Date.AddHours(8);
+                dataDoDateTime = DateTime.Now.Date.AddHours(9);
+                
+                rezerwacje = await ReservationApiClient.GetAllRezerwacje();
+            }
+            else
+            {
+                wiadomosc = "Nie udało się usunąć rezerwacji.";
+                czyBlad = true;
+            }
+        }
+        catch (Exception ex)
+        {
+            wiadomosc = $"Błąd podczas usuwania rezerwacji: {ex.Message}";
+            czyBlad = true;
+        }
+        finally
+        {
+            StateHasChanged();
+        }
+    }
+
+    private int selectedRezerwacjaId = 0;
+
+    private async Task OnRezerwacjaChangedWithId(ChangeEventArgs e)
     {
         try
         {
             if (int.TryParse(e.Value?.ToString(), out var id) && id > 0)
             {
-                selectedSala = sale?.FirstOrDefault(s => s.Id == id);
+                selectedRezerwacjaId = id;
+                var rezerwacja = await ReservationApiClient.GetRezerwacjaById(id);
+                if (rezerwacja != null)
+                {
+                    selectedRezerwacja = new RezerwacjaRequest
+                    {
+                        Data = rezerwacja.Data,
+                        DataOd = rezerwacja.GodzinaRozpoczecia,
+                        DataDo = rezerwacja.GodzinaZakonczenia,
+                        IdSali = rezerwacja.IdSali,
+                        NazwaPrzedmiotu = rezerwacja.NazwaPrzedmiotu,
+                        Imie = rezerwacja.ImieOsoby,
+                        Nazwisko = rezerwacja.NazwiskoOsoby
+                    };
+
+                    // Konwertuj TimeOnly na DateTime dla kontrolek
+                    var baseDate = DateTime.Today;
+                    dataOdDateTime = baseDate.Add(rezerwacja.GodzinaRozpoczecia.ToTimeSpan());
+                    dataDoDateTime = baseDate.Add(rezerwacja.GodzinaZakonczenia.ToTimeSpan());
+                }
             }
             else
             {
-                selectedSala = null;
+                selectedRezerwacjaId = 0;
+                selectedRezerwacja = new RezerwacjaRequest();
+                dataOdDateTime = DateTime.Now.Date.AddHours(8);
+                dataDoDateTime = DateTime.Now.Date.AddHours(9);
             }
         }
         catch (Exception ex)
         {
-            wiadomosc = $"Błąd wyboru sali: {ex.Message}";
-            czyBlad = true;
-        }
-    }
-
-    private async Task ZapiszSale()
-    {
-        try
-        {
-            if (selectedSala == null)
-            {
-                wiadomosc = "Nie wybrano sali do edycji.";
-                czyBlad = true;
-                return;
-            }
-
-            var sukces = await SaleApiClient.UpdateSalaAsync(selectedSala);
-            
-            if (sukces)
-            {
-                wiadomosc = "Sala została zapisana pomyślnie.";
-                czyBlad = false;
-            }
-            else
-            {
-                wiadomosc = "Nie udało się zapisać sali.";
-                czyBlad = true;
-            }
-        }
-        catch (Exception ex)
-        {
-            wiadomosc = $"Błąd zapisu sali: {ex.Message}";
+            wiadomosc = $"Błąd wyboru rezerwacji: {ex.Message}";
             czyBlad = true;
         }
     }

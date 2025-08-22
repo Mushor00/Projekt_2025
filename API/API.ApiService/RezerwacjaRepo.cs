@@ -85,7 +85,7 @@ public class ReservationRepo(MySqlDataSource database)
         return await cmd.ExecuteNonQueryAsync() > 0;
     }
 
-    public async Task<bool> EdytujRezerwacjeAsync(int id, DateOnly date, TimeOnly nowaOd, TimeOnly nowaDo)
+    public async Task<(bool Success, string Message)> EdytujRezerwacjeAsync(int id, DateOnly date, TimeOnly nowaOd, TimeOnly nowaDo)
     {
         using var conn = await database.OpenConnectionAsync();
         using var cmd = conn.CreateCommand();
@@ -98,10 +98,12 @@ public class ReservationRepo(MySqlDataSource database)
         cmd.Parameters.AddWithValue("@nowaDo", nowaDo);
 
         var kolizje = Convert.ToInt32(await cmd.ExecuteScalarAsync());
-        if (kolizje > 0) return false;
+        if (kolizje > 0) return (false, "Sala jest już zajęta w podanym terminie");
 
         // Zaktualizuj rezerwację
         cmd.CommandText = "UPDATE sale_dostepnosc SET Data = @data, Godzina_rozpoczecia = @nowaOd, Godzina_zakonczenia = @nowaDo WHERE ID = @id";
-        return await cmd.ExecuteNonQueryAsync() > 0;
+        var updated = await cmd.ExecuteNonQueryAsync() > 0;
+
+        return updated ? (true, "Rezerwacja została zaktualizowana pomyślnie") : (false, "Nie udało się zaktualizować rezerwacji");
     }
 }
