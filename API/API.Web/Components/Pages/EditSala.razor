@@ -5,7 +5,10 @@
 @using System.ComponentModel.DataAnnotations
 @rendermode InteractiveServer
 
-<h3>Edycja sal</h3>
+<div class="text-center">
+    <h3>Edycja sal</h3>
+</div>
+
 
 @if (sale == null)
 {
@@ -17,66 +20,67 @@ else if (sale.Count == 0)
 }
 else
 {
-    <div class="mb-3">
-        <label>Wybierz salę</label>
-        <select class="form-select" @onchange="OnSalaChanged">
-            <option value="">-- wybierz --</option>
-            @foreach (var s in sale)
-            {
-                <option value="@s.Id">@s.Nazwa (@s.Budynek)</option>
-            }
-        </select>
+    <div style="max-width: 400px; margin: auto;">
+        <div class="mb-3">
+            <label>Wybierz salę</label>
+            <select class="form-select" @onchange="OnSalaChanged">
+                <option value="">-- wybierz --</option>
+                @foreach (var s in sale)
+                {
+                    <option value="@s.Id">@s.Nazwa (@s.Budynek)</option>
+                }
+            </select>
+        </div>
     </div>
 
-    @if (selectedSala != null)
-    {
         <EditForm Model="selectedSala" OnValidSubmit="ZapiszSale" FormName="EditSalaForm">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div class="mb-3">
-                <label class="form-label">Numer</label>
-                <InputNumber class="form-control" @bind-Value="selectedSala.Numer" />
-            </div>
+            <div style="max-width: 400px; margin: auto;">
+                <div class="mb-3">
+                    <label class="form-label">Numer</label>
+                    <InputNumber class="form-control" @bind-Value="selectedSala.Numer" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Budynek</label>
-                <InputText class="form-control" @bind-Value="selectedSala.Budynek" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Budynek</label>
+                    <InputText class="form-control" @bind-Value="selectedSala.Budynek" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Nazwa</label>
-                <InputText class="form-control" @bind-Value="selectedSala.Nazwa" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Nazwa</label>
+                    <InputText class="form-control" @bind-Value="selectedSala.Nazwa" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Pietro</label>
-                <InputNumber class="form-control" @bind-Value="selectedSala.Pietro" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Pietro</label>
+                    <InputNumber class="form-control" @bind-Value="selectedSala.Pietro" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Pojemność</label>
-                <InputNumber class="form-control" @bind-Value="selectedSala.Pojemnosc" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Pojemność</label>
+                    <InputNumber class="form-control" @bind-Value="selectedSala.Pojemnosc" />
+                </div>
 
-            <div class="mb-3">
-                <label class="form-label">Dostępna</label>
-                <InputCheckbox class="form-check-input" @bind-Value="selectedSala.Dostepna" />
-            </div>
+                <div class="mb-3">
+                    <label class="form-label">Dostępna</label>
+                    <InputCheckbox class="form-check-input" @bind-Value="selectedSala.Dostepna" />
+                </div>
 
-            <button type="submit" class="btn btn-primary">Zapisz</button>
+                <button type="submit" class="btn btn-primary">Zapisz</button>
+            </div>
         </EditForm>
 
         @if (!string.IsNullOrEmpty(wiadomosc))
         {
             <div class="alert @(czyBlad ? "alert-danger" : "alert-success") mt-3">@wiadomosc</div>
         }
-    }
 }
 
 @code {
     private List<Sala>? sale;
-    private Sala? selectedSala;
+    private Sala selectedSala = new Sala();
     private string wiadomosc = "";
     private bool czyBlad = false;
 
