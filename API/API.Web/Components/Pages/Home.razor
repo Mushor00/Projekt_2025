@@ -177,12 +177,7 @@
                                                     bool isReservedDay = (i == currentDate.Day);
                                                     <div class="m-1 px-2 py-1 border rounded @(isReservedDay ? "bg-primary text-white" : "bg-light")" style="width: 30px;">
                                                         @i
-                                                    </div>
-                                                    @* Tak CHYBA powinno wyglądać jak bedziemy dawać date rezerwacji z bazy. *@
-                                                    @* bool isReservedDay = (i == item.DataRezerwacji.Day *@
-                                                    @* && item.DataRezerwacji.Month == currentDate.Month *@
-                                                    @* && item.DataRezerwacji.Year == currentDate.Year); *@
-
+                                                    </div>    
                                                 }
                                             </div>
                                         </div>

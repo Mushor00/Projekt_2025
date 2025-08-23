@@ -22,7 +22,7 @@ else if (rezerwacje.Count == 0)
 }
 else
 {
-    <div style="max-width: 600px; margin: auto;">
+    <div style="max-width: 400px; margin: auto;">
         <div class="mb-3">
             <label>Wybierz rezerwację</label>
             <select class="form-select" @onchange="OnRezerwacjaChangedWithId">
@@ -39,7 +39,7 @@ else
             <DataAnnotationsValidator />
             <ValidationSummary />
 
-            <div style="max-width: 600px; margin: auto;">
+        <div style="max-width: 400px; margin: auto;">
                 <div class="mb-3">
                     <label class="form-label">Data</label>
                     <InputDate class="form-control" @bind-Value="selectedRezerwacja.Data" />
